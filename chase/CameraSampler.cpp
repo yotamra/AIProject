@@ -25,8 +25,8 @@ void CameraSampler::run()
     update();
 
 	if (m_recored_image == true) {
-		m_color_frame->save("C:\\TempPic\\" + to_string(ULONGLONG(image_num)) + "color");
-		m_depth_frame->save("C:\\TempPic\\" + to_string(ULONGLONG(image_num)) + "depth");
+		m_color_frame->save("C:\\TempPic\\" + to_string(ULONGLONG(image_num)) + "color"); //every taken picture is recorded
+		m_depth_frame->save("C:\\TempPic\\" + to_string(ULONGLONG(image_num)) + "depth"); //every taken picture is recorded
 		image_num++;
 	}
 
