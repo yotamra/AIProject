@@ -1,0 +1,484 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{1F0BC48E-05E0-4FEB-B549-0B8437483729}</ProjectGuid>
+    <RootNamespace>chase</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+    <SccProjectName>Svn</SccProjectName>
+    <SccAuxPath>Svn</SccAuxPath>
+    <SccLocalPath>Svn</SccLocalPath>
+    <SccProvider>SubversionScc</SccProvider>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\Program Files\MobileRobots\ARIA\include;C:\Program Files %28x86%29\OpenNI\Include;$(SolutionDir)extract_man_lib;$(SolutionDir)include;C:\boost_1_56_0;C:\OpenCV2.1\include\opencv;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\Program Files\MobileRobots\ARIA\lib;C:\boost_1_56_0\libs;C:\Program Files %28x86%29\OpenNI\Lib;C:\OpenCV2.1\lib;$(SolutionDir)$(Configuration);$(LibraryPath)</LibraryPath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\Program Files\MobileRobots\ARIA\include;C:\Program Files %28x86%29\OpenNI\Include;$(SolutionDir)extract_man_lib;$(SolutionDir)include;C:\boost_1_56_0;C:\OpenCV2.1\include\opencv;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\Program Files\MobileRobots\ARIA\lib;C:\boost_1_56_0\libs;C:\Program Files %28x86%29\OpenNI\Lib;C:\OpenCV2.1\lib;$(SolutionDir)$(Configuration);$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DisableSpecificWarnings>4786;4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>;OpenNI.lib;cv210.lib;cxcore210.lib;highgui210.lib;extract_man_lib.lib;winmm.lib;User32.lib;AriaDebugVC10.lib;</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Program Files\OpenNI\Lib;$(SolutionDir)$(Configuration)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy /y "$(ProjectDir)classifier.xml" "$(SolutionDir)$(Configuration)"
+copy /y "$(ProjectDir)AriaDebugVC10.dll" "$(SolutionDir)$(Configuration)"
+xcopy  /E /D /I "$(ProjectDir)sounds" "$(SolutionDir)$(Configuration)\sounds"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4786;4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>;OpenNI.lib;cv210.lib;cxcore210.lib;highgui210.lib;extract_man_lib.lib;winmm.lib;User32.lib;AriaVC10.lib;</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Program Files\OpenNI\Lib;$(SolutionDir)$(Configuration)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy /y "$(ProjectDir)classifier.xml" "$(SolutionDir)$(Configuration)"
+copy /y "$(ProjectDir)AriaVC10.dll" "$(SolutionDir)$(Configuration)"
+xcopy  /E /D /I "$(ProjectDir)sounds" "$(SolutionDir)$(Configuration)\sounds"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="CameraSampler.cpp" />
+    <ClCompile Include="CFollow.cpp" />
+    <ClCompile Include="f_legs.cpp" />
+    <ClCompile Include="f_moment_invariants.cpp" />
+    <ClCompile Include="f_rays.cpp" />
+    <ClCompile Include="f_sppa.cpp" />
+    <ClCompile Include="FallDetector.cpp" />
+    <ClCompile Include="KeyboardThread.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="moments.cpp" />
+    <ClCompile Include="pinpointing.cpp" />
+    <ClCompile Include="Sounds.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\extract_man_lib\CameraSampler.h" />
+    <ClInclude Include="CFollow.h" />
+    <ClInclude Include="clseval.h" />
+    <ClInclude Include="FallDetector.h" />
+    <ClInclude Include="FPS_timer.h" />
+    <ClInclude Include="KeyboardThread.h" />
+    <ClInclude Include="moments.h" />
+    <ClInclude Include="pinpointing.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="Sounds.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="chase.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\extract_man_lib\extract_man_lib.vcxproj">
+      <Project>{e92da66e-5728-47a0-85e6-9f76cbf047af}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\libsensor\libsensor.vcxproj">
+      <Project>{55158d34-6d38-4090-ad66-b15ae594b4cf}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Navigation\Navigation.vcxproj">
+      <Project>{071c5a4f-0861-437e-915a-8fcb41db60ff}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\robctrl\robctrl.vcxproj">
+      <Project>{75da4104-f917-42e9-9194-087c9a976b53}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\utils\utils.vcxproj">
+      <Project>{ffcf303e-5154-4a55-92d6-bf780382e2c8}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="AriaDebugVC10.dll" />
+    <None Include="AriaVC10.dll" />
+    <None Include="classifier.xml" />
+    <None Include="sounds\iface\sound1.mp3" />
+    <None Include="sounds\iface\sound10.mp3" />
+    <None Include="sounds\iface\sound11.mp3" />
+    <None Include="sounds\iface\sound12.mp3" />
+    <None Include="sounds\iface\sound13.mp3" />
+    <None Include="sounds\iface\sound14.mp3" />
+    <None Include="sounds\iface\sound15.mp3" />
+    <None Include="sounds\iface\sound16.mp3" />
+    <None Include="sounds\iface\sound17.mp3" />
+    <None Include="sounds\iface\sound18.mp3" />
+    <None Include="sounds\iface\sound19.mp3" />
+    <None Include="sounds\iface\sound2.mp3" />
+    <None Include="sounds\iface\sound20.mp3" />
+    <None Include="sounds\iface\sound21.mp3" />
+    <None Include="sounds\iface\sound22.mp3" />
+    <None Include="sounds\iface\sound23.mp3" />
+    <None Include="sounds\iface\sound24.mp3" />
+    <None Include="sounds\iface\sound25.mp3" />
+    <None Include="sounds\iface\sound26.mp3" />
+    <None Include="sounds\iface\sound27.mp3" />
+    <None Include="sounds\iface\sound28.mp3" />
+    <None Include="sounds\iface\sound29.mp3" />
+    <None Include="sounds\iface\sound30.mp3" />
+    <None Include="sounds\iface\sound31.mp3" />
+    <None Include="sounds\iface\sound32.mp3" />
+    <None Include="sounds\iface\sound33.mp3" />
+    <None Include="sounds\iface\sound34.mp3" />
+    <None Include="sounds\iface\sound35.mp3" />
+    <None Include="sounds\iface\sound36.mp3" />
+    <None Include="sounds\iface\sound37.mp3" />
+    <None Include="sounds\iface\sound38.mp3" />
+    <None Include="sounds\iface\sound39.mp3" />
+    <None Include="sounds\iface\sound4.mp3" />
+    <None Include="sounds\iface\sound40.mp3" />
+    <None Include="sounds\iface\sound5.mp3" />
+    <None Include="sounds\iface\sound6.mp3" />
+    <None Include="sounds\iface\sound7.mp3" />
+    <None Include="sounds\iface\sound8.mp3" />
+    <None Include="sounds\iface\sound9.mp3" />
+    <None Include="sounds\voices\0.wav" />
+    <None Include="sounds\voices\1.wav" />
+    <None Include="sounds\voices\2.wav" />
+    <None Include="sounds\voices\3.wav" />
+    <None Include="sounds\voices\4.wav" />
+    <None Include="sounds\voices\5.wav" />
+    <None Include="sounds\voices\6.wav" />
+    <None Include="sounds\voices\7.wav" />
+    <None Include="sounds\voices\8.wav" />
+    <None Include="sounds\voices\9.wav" />
+    <None Include="sounds\voices\aaaah.wav" />
+    <None Include="sounds\voices\aahhh.wav" />
+    <None Include="sounds\voices\aahhzz.wav" />
+    <None Include="sounds\voices\aauuu.wav" />
+    <None Include="sounds\voices\ah.wav" />
+    <None Include="sounds\voices\all-right.wav" />
+    <None Include="sounds\voices\all-the-way.wav" />
+    <None Include="sounds\voices\am-i-totally-screwed-or.wav" />
+    <None Include="sounds\voices\and-1.wav" />
+    <None Include="sounds\voices\and-2.wav" />
+    <None Include="sounds\voices\blah-blah-blah.wav" />
+    <None Include="sounds\voices\bye-bye-1.wav" />
+    <None Include="sounds\voices\bye-bye-2.wav" />
+    <None Include="sounds\voices\bye-bye-3.wav" />
+    <None Include="sounds\voices\bye-bye-4.wav" />
+    <None Include="sounds\voices\bye-bye-5.wav" />
+    <None Include="sounds\voices\bye-bye-6.wav" />
+    <None Include="sounds\voices\bye.wav" />
+    <None Include="sounds\voices\can-you-get-it.wav" />
+    <None Include="sounds\voices\can-you-keep-a-secret.wav" />
+    <None Include="sounds\voices\chase menu.wav" />
+    <None Include="sounds\voices\come-on-1.wav" />
+    <None Include="sounds\voices\come-on-2.wav" />
+    <None Include="sounds\voices\come-on-3.wav" />
+    <None Include="sounds\voices\come-on-come-on-1.wav" />
+    <None Include="sounds\voices\come-on-come-on-2.wav" />
+    <None Include="sounds\voices\come-on-you-can-do-it.wav" />
+    <None Include="sounds\voices\damn-it.wav" />
+    <None Include="sounds\voices\dinner-is-served.wav" />
+    <None Include="sounds\voices\do-you-like-it.wav" />
+    <None Include="sounds\voices\focus.wav" />
+    <None Include="sounds\voices\found you.wav" />
+    <None Include="sounds\voices\friday-rocks.wav" />
+    <None Include="sounds\voices\get-away-from-me.wav" />
+    <None Include="sounds\voices\go-go-go.wav" />
+    <None Include="sounds\voices\go-go.wav" />
+    <None Include="sounds\voices\go-head.wav" />
+    <None Include="sounds\voices\goddamnit.wav" />
+    <None Include="sounds\voices\goodbye.wav" />
+    <None Include="sounds\voices\guess-what-1.wav" />
+    <None Include="sounds\voices\guess-what-2.wav" />
+    <None Include="sounds\voices\have-a-good-weekend.wav" />
+    <None Include="sounds\voices\hello-1.wav" />
+    <None Include="sounds\voices\hello-2.wav" />
+    <None Include="sounds\voices\hello-3.wav" />
+    <None Include="sounds\voices\hello-4.wav" />
+    <None Include="sounds\voices\here-i-come.wav" />
+    <None Include="sounds\voices\hey-sweetness-1.wav" />
+    <None Include="sounds\voices\hey-sweetness-2.wav" />
+    <None Include="sounds\voices\hey.wav" />
+    <None Include="sounds\voices\hi-1.wav" />
+    <None Include="sounds\voices\hi-2.wav" />
+    <None Include="sounds\voices\hi-3.wav" />
+    <None Include="sounds\voices\hi-cutiepie.wav" />
+    <None Include="sounds\voices\honey-1.wav" />
+    <None Include="sounds\voices\honey-2.wav" />
+    <None Include="sounds\voices\honey-look-at-this.wav" />
+    <None Include="sounds\voices\horn.wav" />
+    <None Include="sounds\voices\hot-stuff-coming-up.wav" />
+    <None Include="sounds\voices\how-dare-you.wav" />
+    <None Include="sounds\voices\huh-1.wav" />
+    <None Include="sounds\voices\huh-2.wav" />
+    <None Include="sounds\voices\i-agree.wav" />
+    <None Include="sounds\voices\i-can%27t-believe-i-let-you.wav" />
+    <None Include="sounds\voices\i-cant-stand-you.wav" />
+    <None Include="sounds\voices\i-cant-take-this.wav" />
+    <None Include="sounds\voices\i-cant-wait.wav" />
+    <None Include="sounds\voices\i-dont-think-so-1.wav" />
+    <None Include="sounds\voices\i-dont-think-so-2.wav" />
+    <None Include="sounds\voices\i-dont-understand.wav" />
+    <None Include="sounds\voices\i-just-got-here.wav" />
+    <None Include="sounds\voices\i-know-youre-there.wav" />
+    <None Include="sounds\voices\i-know.wav" />
+    <None Include="sounds\voices\i-love-you-1.wav" />
+    <None Include="sounds\voices\i-love-you-2.wav" />
+    <None Include="sounds\voices\i-love-you-3.wav" />
+    <None Include="sounds\voices\i-love-you-4.wav" />
+    <None Include="sounds\voices\i-love-you-5.wav" />
+    <None Include="sounds\voices\i-think-that-this-is.wav" />
+    <None Include="sounds\voices\i-wanna-discuss.wav" />
+    <None Include="sounds\voices\ill-keep-calling-1.wav" />
+    <None Include="sounds\voices\ill-keep-calling-2.wav" />
+    <None Include="sounds\voices\ill-tell-you-what-i-think.wav" />
+    <None Include="sounds\voices\im-gonna-go.wav" />
+    <None Include="sounds\voices\im-in-touble.wav" />
+    <None Include="sounds\voices\im-not-mad.wav" />
+    <None Include="sounds\voices\im-so-glad.wav" />
+    <None Include="sounds\voices\im-so-hungry.wav" />
+    <None Include="sounds\voices\im-so-ready.wav" />
+    <None Include="sounds\voices\im-sorry-i-cant.wav" />
+    <None Include="sounds\voices\im-sorry.wav" />
+    <None Include="sounds\voices\im-the-man.wav" />
+    <None Include="sounds\voices\initialization failed.wav" />
+    <None Include="sounds\voices\initialization successful.wav" />
+    <None Include="sounds\voices\initializing.wav" />
+    <None Include="sounds\voices\it-smells-really-good.wav" />
+    <None Include="sounds\voices\its-a-prank-caller.wav" />
+    <None Include="sounds\voices\its-almost-time.wav" />
+    <None Include="sounds\voices\its-me-again.wav" />
+    <None Include="sounds\voices\its-me.wav" />
+    <None Include="sounds\voices\its-not-that-easy.wav" />
+    <None Include="sounds\voices\its-you.wav" />
+    <None Include="sounds\voices\its-your-sweetheart-again.wav" />
+    <None Include="sounds\voices\ive-been-doing.wav" />
+    <None Include="sounds\voices\just-about-done-honey.wav" />
+    <None Include="sounds\voices\Left.wav" />
+    <None Include="sounds\voices\let-me-out-of-here-1.wav" />
+    <None Include="sounds\voices\let-me-out-of-here-2.wav" />
+    <None Include="sounds\voices\maybe-next-time-huh.wav" />
+    <None Include="sounds\voices\maybe-next-time.wav" />
+    <None Include="sounds\voices\mayday.wav" />
+    <None Include="sounds\voices\mmm-1.wav" />
+    <None Include="sounds\voices\mmm-2.wav" />
+    <None Include="sounds\voices\mmm-3.wav" />
+    <None Include="sounds\voices\mom-1.wav" />
+    <None Include="sounds\voices\mom-2.wav" />
+    <None Include="sounds\voices\nice-work.wav" />
+    <None Include="sounds\voices\no-1.wav" />
+    <None Include="sounds\voices\no-2.wav" />
+    <None Include="sounds\voices\no-3.wav" />
+    <None Include="sounds\voices\no-4.wav" />
+    <None Include="sounds\voices\no-5.wav" />
+    <None Include="sounds\voices\no-6.wav" />
+    <None Include="sounds\voices\no-thats-not-gonna-do-it.wav" />
+    <None Include="sounds\voices\oh-my-god-1.wav" />
+    <None Include="sounds\voices\oh-my-god-2.wav" />
+    <None Include="sounds\voices\oh-thats-okay.wav" />
+    <None Include="sounds\voices\oh-yeah-1.wav" />
+    <None Include="sounds\voices\oh-yeah-2.wav" />
+    <None Include="sounds\voices\oh-yeah-everything-is-fine.wav" />
+    <None Include="sounds\voices\okay-1.wav" />
+    <None Include="sounds\voices\okay-2.wav" />
+    <None Include="sounds\voices\okay-3.wav" />
+    <None Include="sounds\voices\okay-4.wav" />
+    <None Include="sounds\voices\okay-5.wav" />
+    <None Include="sounds\voices\okay-6.wav" />
+    <None Include="sounds\voices\okay-7.wav" />
+    <None Include="sounds\voices\okay-bye.wav" />
+    <None Include="sounds\voices\okay-come-on.wav" />
+    <None Include="sounds\voices\okay-well.wav" />
+    <None Include="sounds\voices\ooooh.wav" />
+    <None Include="sounds\voices\open-the-door.wav" />
+    <None Include="sounds\voices\open-the-goddamn-door.wav" />
+    <None Include="sounds\voices\over-here-1.wav" />
+    <None Include="sounds\voices\over-here-2.wav" />
+    <None Include="sounds\voices\paused.wav" />
+    <None Include="sounds\voices\pick-up-the-phone-1.wav" />
+    <None Include="sounds\voices\pick-up-the-phone-2.wav" />
+    <None Include="sounds\voices\please.wav" />
+    <None Include="sounds\voices\poor-baby.wav" />
+    <None Include="sounds\voices\president-is-moron.wav" />
+    <None Include="sounds\voices\pssst-1.wav" />
+    <None Include="sounds\voices\pssst-2.wav" />
+    <None Include="sounds\voices\recording.wav" />
+    <None Include="sounds\voices\resuming.wav" />
+    <None Include="sounds\voices\Right.wav" />
+    <None Include="sounds\voices\rrrou-1.wav" />
+    <None Include="sounds\voices\rrrou-2.wav" />
+    <None Include="sounds\voices\seriously-right.wav" />
+    <None Include="sounds\voices\seriously.wav" />
+    <None Include="sounds\voices\shall-we.wav" />
+    <None Include="sounds\voices\shes-a-crazy-psycho-1.wav" />
+    <None Include="sounds\voices\shes-a-crazy-psycho-2.wav" />
+    <None Include="sounds\voices\shh-shh.wav" />
+    <None Include="sounds\voices\shit.wav" />
+    <None Include="sounds\voices\shut-up-1.wav" />
+    <None Include="sounds\voices\shut-up-2.wav" />
+    <None Include="sounds\voices\sigh-1.wav" />
+    <None Include="sounds\voices\sigh-2.wav" />
+    <None Include="sounds\voices\sigh-3.wav" />
+    <None Include="sounds\voices\suck-it-up.wav" />
+    <None Include="sounds\voices\taking picture.wav" />
+    <None Include="sounds\voices\target lost.wav" />
+    <None Include="sounds\voices\thank-god-its-friday.wav" />
+    <None Include="sounds\voices\that-feels-really-powerful.wav" />
+    <None Include="sounds\voices\thatd-be-fantastic.wav" />
+    <None Include="sounds\voices\thats-it.wav" />
+    <None Include="sounds\voices\thats-okay-1.wav" />
+    <None Include="sounds\voices\thats-okay-2.wav" />
+    <None Include="sounds\voices\thats-pretty-much-it.wav" />
+    <None Include="sounds\voices\thats-the-loveliest-thing.wav" />
+    <None Include="sounds\voices\the camera is a little too high.wav" />
+    <None Include="sounds\voices\the camera is a little too low.wav" />
+    <None Include="sounds\voices\the camera is ok.wav" />
+    <None Include="sounds\voices\the camera is too high.wav" />
+    <None Include="sounds\voices\the camera is too low.wav" />
+    <None Include="sounds\voices\this-is-delicious.wav" />
+    <None Include="sounds\voices\this-is-ridiculous.wav" />
+    <None Include="sounds\voices\this-looks-delicious.wav" />
+    <None Include="sounds\voices\u-hmm-1.wav" />
+    <None Include="sounds\voices\u-hmm-2.wav" />
+    <None Include="sounds\voices\u-huh.wav" />
+    <None Include="sounds\voices\uh.wav" />
+    <None Include="sounds\voices\unbelievable.wav" />
+    <None Include="sounds\voices\urghhh.wav" />
+    <None Include="sounds\voices\uuh.wav" />
+    <None Include="sounds\voices\wait-a-minute.wav" />
+    <None Include="sounds\voices\wanna-go-shopping.wav" />
+    <None Include="sounds\voices\we-need-to-have.wav" />
+    <None Include="sounds\voices\well-talk-about-it-soon.wav" />
+    <None Include="sounds\voices\well-talk.wav" />
+    <None Include="sounds\voices\well.wav" />
+    <None Include="sounds\voices\werent-you-listening.wav" />
+    <None Include="sounds\voices\what-1.wav" />
+    <None Include="sounds\voices\what-2.wav" />
+    <None Include="sounds\voices\what-3.wav" />
+    <None Include="sounds\voices\what-4.wav" />
+    <None Include="sounds\voices\what-5.wav" />
+    <None Include="sounds\voices\what-are-you-doing.wav" />
+    <None Include="sounds\voices\what-do-you-think.wav" />
+    <None Include="sounds\voices\where-are-we-going.wav" />
+    <None Include="sounds\voices\who-are-you.wav" />
+    <None Include="sounds\voices\who-is-this.wav" />
+    <None Include="sounds\voices\why.wav" />
+    <None Include="sounds\voices\woohoo.wav" />
+    <None Include="sounds\voices\wow-1.wav" />
+    <None Include="sounds\voices\wow-2.wav" />
+    <None Include="sounds\voices\xml fail.wav" />
+    <None Include="sounds\voices\yay.wav" />
+    <None Include="sounds\voices\yeah.wav" />
+    <None Include="sounds\voices\yes-1.wav" />
+    <None Include="sounds\voices\yes-2.wav" />
+    <None Include="sounds\voices\yes-3.wav" />
+    <None Include="sounds\voices\yes-4.wav" />
+    <None Include="sounds\voices\yes-5.wav" />
+    <None Include="sounds\voices\yes-hahahaa.wav" />
+    <None Include="sounds\voices\yes-indeed.wav" />
+    <None Include="sounds\voices\yes-please.wav" />
+    <None Include="sounds\voices\yoga-1.wav" />
+    <None Include="sounds\voices\yoga-2.wav" />
+    <None Include="sounds\voices\you-are-acting-so-weird.wav" />
+    <None Include="sounds\voices\you-call-that-fun.wav" />
+    <None Include="sounds\voices\you-can-do-it.wav" />
+    <None Include="sounds\voices\you-can-stay-at-home.wav" />
+    <None Include="sounds\voices\you-crack-me-up.wav" />
+    <None Include="sounds\voices\you-dont-know-how.wav" />
+    <None Include="sounds\voices\you-got-it-1.wav" />
+    <None Include="sounds\voices\you-got-it-2.wav" />
+    <None Include="sounds\voices\you-know-what-im-talking.wav" />
+    <None Include="sounds\voices\you-look-so-handsome.wav" />
+    <None Include="sounds\voices\you-need-to-grow-up.wav" />
+    <None Include="sounds\voices\you-silly-thing.wav" />
+    <None Include="sounds\voices\you-too.wav" />
+    <None Include="sounds\voices\you-wanna-come-in.wav" />
+    <None Include="sounds\voices\you-wanna-go.wav" />
+    <None Include="sounds\voices\youll-see-very-soon.wav" />
+    <None Include="sounds\voices\youre-almost-there.wav" />
+    <None Include="sounds\voices\youre-funny-1.wav" />
+    <None Include="sounds\voices\youre-funny-2.wav" />
+    <None Include="sounds\voices\youre-funny-3.wav" />
+    <None Include="sounds\voices\youre-my-man.wav" />
+    <None Include="sounds\voices\youre-on-the-right-track.wav" />
+    <None Include="sounds\voices\youre-so-cute.wav" />
+    <None Include="sounds\voices\youre-so-funny-1.wav" />
+    <None Include="sounds\voices\youre-so-funny-2.wav" />
+    <None Include="sounds\voices\youre-so-funny-3.wav" />
+    <None Include="sounds\voices\youve-been-a-very-good.wav" />
+    <None Include="sounds\voices\youve-been-acting.wav" />
+    <None Include="sounds\voices\yummy.wav" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
