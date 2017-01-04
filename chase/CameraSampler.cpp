@@ -8,8 +8,8 @@ CameraSampler::CameraSampler()
   m_depth_frame = Image(new CPPImage(640, 480, 1));
   m_finished_init=false;
   m_Terminate = false;
-  m_recored_image = true;
-  TakeSampleFromCamera = false;
+  m_recored_image = false;
+  TakeSampleFromCamera = true;
   frameNumber = 0;
   image_num = 0;
 }
@@ -21,8 +21,10 @@ void CameraSampler::wait_for_finished_initializing()
 
 void CameraSampler::run()
 {
-    m_cam=Sensor::create();
-    update();
+	if (TakeSampleFromCamera == true) {
+		m_cam = Sensor::create();
+	}
+	update();
 
 	if (m_recored_image == true) {
 		m_color_frame->save("C:\\TempPic\\" + to_string(ULONGLONG(image_num)) + "color"); //every taken picture is recorded
@@ -73,11 +75,13 @@ void CameraSampler::update()
   if (TakeSampleFromCamera == true) {
 	  m_color_frame = Image(new CPPImage(640, 480, 3));
 	  m_depth_frame = Image(new CPPImage(640, 480, 1));
-	  m_cam->update(m_color_frame, m_depth_frame)
+	  m_cam->update(m_color_frame, m_depth_frame);
   }
   else {
-	  m_color_frame = Image(new CPPImage("C:\\Project\\Benchmarks" + to_string(_ULONGLONG(frameNumber)) + "color"));
-	  m_depth_frame = Image(new CPPImage("C:\\Project\\Benchmarks" + to_string(_ULONGLONG(frameNumber)) + "depth"));
+	  string path = "C:\\Benchmarks\\BenchmarkPicturesChairs\\";
+	  path += to_string(static_cast<long long>(frameNumber));
+	  m_color_frame = Image(new CPPImage(path + "color.jpg"));
+	  m_depth_frame = Image(new CPPImage(path + "depth.jpg"));
 	  frameNumber++;
   }
 

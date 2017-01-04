@@ -28,7 +28,10 @@ void CFollow::Init()
 {
   play_wav_clip("chase menu");
   std::cout << "Chasing...\n";
-  m_Robot=RobotInterface::create(4,38400);
+  
+#ifndef NO_ROBOT
+  m_Robot = RobotInterface::create(4, 38400);
+#endif
 
   // Keyboard
   m_Kbd.start();
@@ -124,8 +127,10 @@ void CFollow::KeyPaused()
     if (!m_bPaused) 
     {
       std::cout << "Paused\n";
+#ifndef NO_ROBOT
       m_Robot->stop();
-    }
+#endif
+	}
 #ifdef Work_With_FallDetector
 	m_pFall_Detector->pause();
 #endif // Work_With_FallDetector
@@ -176,11 +181,12 @@ void CFollow::DriveControl()
            }
 		   short speedLeft = SPEED_COEFFICIENT * m_FollowParameters.speedLeft;
 		   short speedRight = SPEED_COEFFICIENT * m_FollowParameters.speedRight;
-           m_Robot->drive(speedLeft, speedRight);
+		   m_Robot->drive(speedLeft, speedRight);
+
 		   if (STATE_SEARCH == m_FollowParameters.state)
            {
                Sleep(ROTATE_SLEEP_TIME);
-	           m_Robot->stop();
+			   m_Robot->stop();
 	           m_FollowParameters.counterPersonNotFound = 0;
            }
        }
@@ -520,6 +526,8 @@ void CFollow::RunningAndFollow()
 {
   bool TakeSampleFromCamera = false;
   //run until told to stop
+  cvNamedWindow("RGBImage:", CV_WINDOW_AUTOSIZE);
+  cvNamedWindow("EDepthImage:", CV_WINDOW_AUTOSIZE);
   while (m_Kbd.is_active())
   { 
 	// It will print FPS every few loops
@@ -527,13 +535,12 @@ void CFollow::RunningAndFollow()
 
 	m_Sampler.update(m_iRgb_Frame, m_iFrame);
 	m_iFrame = convert_to_gray(m_iFrame);
-
-    
+	//CFrameManager::displayImage(m_iFrame);
+	cvShowImage("RGBImage:", ((CPPImage*)m_iRgb_Frame.get())->get());
+	cvShowImage("EDepthImage:", ((CPPImage*)m_iFrame.get())->get());
+	cvWaitKey(20);
     // target is now the person if personFound==true
     Image target=CFrameManager::extract_man(m_iRgb_Frame,m_iFrame,m_Te,m_x,m_y,m_bPersonFound);
-
-	
-
     
 	if (m_bPersonFound)
     {
@@ -578,7 +585,9 @@ void CFollow::RunningAndFollow()
 #endif // Work_With_FallDetector
 
 	// Set the velocities to the robot drive
+#ifndef NO_ROBOT
 	DriveControl();
+#endif
 
   } // end while()
 
