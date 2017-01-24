@@ -526,8 +526,10 @@ void CFollow::RunningAndFollow()
 {
   bool TakeSampleFromCamera = false;
   //run until told to stop
-  cvNamedWindow("RGBImage:", CV_WINDOW_AUTOSIZE);
-  cvNamedWindow("EDepthImage:", CV_WINDOW_AUTOSIZE);
+
+  //cv::namedWindow("RGBImage:", CV_WINDOW_AUTOSIZE);
+  //cv::namedWindow("EDepthImage:", CV_WINDOW_AUTOSIZE);
+
   while (m_Kbd.is_active())
   { 
 	// It will print FPS every few loops
@@ -535,10 +537,11 @@ void CFollow::RunningAndFollow()
 
 	m_Sampler.update(m_iRgb_Frame, m_iFrame);
 	m_iFrame = convert_to_gray(m_iFrame);
+
+	// Debug image display yotam
 	//CFrameManager::displayImage(m_iFrame);
-	cvShowImage("RGBImage:", ((CPPImage*)m_iRgb_Frame.get())->get());
-	cvShowImage("EDepthImage:", ((CPPImage*)m_iFrame.get())->get());
-	cvWaitKey(20);
+	//CFrameManager::displayImage(m_iRgb_Frame);
+
     // target is now the person if personFound==true
     Image target=CFrameManager::extract_man(m_iRgb_Frame,m_iFrame,m_Te,m_x,m_y,m_bPersonFound);
     

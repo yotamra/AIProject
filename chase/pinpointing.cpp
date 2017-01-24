@@ -16,18 +16,18 @@ void current_position_comparing_optimal(Image& colorImage,Image& depthImage)
   CEdgeDetector::calcLaplace(w,h,colorImage,depthImage,total_laplace,depth_laplace,hPic);
 
   //find the bottom row on the image
-	IplImage* img = ((CPPImage*)depth_laplace.get())->get();
+	Mat* img = ((CPPImage*)depth_laplace.get())->get();
 
 	int rowSum = 0;
 	int i = 0;
 
 	// search the bottom line until we hit a minimum sum
-	for(i=img->height-5; i>0; i--)
+	for(i=img->rows -5; i>0; i--)
 	{
 		rowSum = 0;
-		for(int j=WALLS_OFFSET; j<img->width-WALLS_OFFSET; j++)
+		for(int j=WALLS_OFFSET; j<img->cols -WALLS_OFFSET; j++)
 		{
-			if (cvGet2D(img,i,j).val[0] != 0)
+			if (cv::Scalar(img->at<uchar>(j, i)).val[0] != 0)
 			{
 				++rowSum;
 			}
@@ -39,7 +39,7 @@ void current_position_comparing_optimal(Image& colorImage,Image& depthImage)
     if (i%jumpSize==0)
     {
       printf("line number %d has rowSum=%d\n",i/jumpSize,rowSum);
-      for(int j=0; j<img->width; j++)
+      for(int j=0; j<img->cols; j++)
       {
         setVal(depth_laplace,i,j,255);
       }
@@ -49,7 +49,7 @@ void current_position_comparing_optimal(Image& colorImage,Image& depthImage)
 
 		if(rowSum > BAR_NUM_OF_PIXELS)
 		{
-      for(int j=0; j<img->width; j++)
+      for(int j=0; j<img->cols; j++)
       {
         setVal(depth_laplace,i,j,150);
       }

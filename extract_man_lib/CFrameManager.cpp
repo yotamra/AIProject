@@ -80,13 +80,13 @@ Image CFrameManager::buildPersonRect(Image& colorImage,Image& depthImage,ClsEval
 	
 	int w = ((CPPImage*)colorImage.get())->get_width();
 	int h = ((CPPImage*)colorImage.get())->get_height();
-	CvSize size = cvSize(w,h);
-	IplImage* img = cvCreateImage( size, 8,3 );
+	cv::Size size = cv::Size(w,h);
+	cv::Mat* img = new cv::Mat( size, 8,3 );
 	
 	if (saveTracking)
 	{	
 		// create HSV image and fill it with 
-		cvCopyImage(((CPPImage*)colorImage.get())->get(),img);
+		cvCopy(((CPPImage*)colorImage.get())->get(),img);
 		cvCvtColor(img,img,CV_BGR2HSV);
 
 		CvScalar temp;
@@ -193,17 +193,14 @@ Displays the given image in a new window.
 */
 void CFrameManager::displayImage(Image& image)
 {
-	IplImage *img = ((CPPImage*)image.get())->get();
+	Mat *img = ((CPPImage*)image.get())->get();
+
 	// Display the image.
-    cvNamedWindow("Image:", CV_WINDOW_AUTOSIZE);
-    cvShowImage("Image:", img);
+    cv::namedWindow("Image:", CV_WINDOW_AUTOSIZE);
+    cv::imshow("Image:", *img);
 
     // Wait for the user to press a key in the GUI window.
-    cvWaitKey(0);
-
-    // Free the resources.
-    cvDestroyWindow("Image:");
-    //cvReleaseImage(&img);
+    cv::waitKey(0);
 }
 
 /*
@@ -228,10 +225,10 @@ Image CFrameManager::extract_man(Image& colorImage,Image& depthImage,
 	int h = ((CPPImage*)colorImage.get())->get_height();
 	
 	Image smaller_color(new CPPImage(w/2,h/2,3));
-	cvResize(((CPPImage*)colorImage.get())->get(),((CPPImage*)smaller_color.get())->get());
+	cv::resize(*((CPPImage*)colorImage.get())->get(),*((CPPImage*)smaller_color.get())->get(), cv::Size(w/2, h/2));
 	
 	Image smaller_depth(new CPPImage(w/2,h/2,1));
-	cvResize(((CPPImage*)depthImage.get())->get(),((CPPImage*)smaller_depth.get())->get());
+	cv::resize(*((CPPImage*)depthImage.get())->get(),*((CPPImage*)smaller_depth.get())->get(),cv::Size(w/2,h/2));
 	
 	//cout << "recieved image..." << endl;
 	// find the cc of the color and depth image
@@ -307,11 +304,15 @@ bool CFrameManager::initPersonHist(Image& colorImage,Image& depthImage,ClsEvalua
 	int h = ((CPPImage*)colorImage.get())->get_height();
 	
 	Image smaller_color(new CPPImage(w/2,h/2,3));
-	cvResize(((CPPImage*)colorImage.get())->get(),((CPPImage*)smaller_color.get())->get());
+	cv::resize(*((CPPImage*)colorImage.get())->get(),*((CPPImage*)smaller_color.get())->get(),cv::Size(w/2,h/2));
 	
 	Image smaller_depth(new CPPImage(w/2,h/2,1));
-	cvResize(((CPPImage*)depthImage.get())->get(),((CPPImage*)smaller_depth.get())->get());
-	
+	cv::resize(*((CPPImage*)depthImage.get())->get(), *((CPPImage*)smaller_depth.get())->get(), cv::Size(w/2,h/2));
+
+	// Debug image display yotam
+	//CFrameManager::displayImage(smaller_color);
+	//CFrameManager::displayImage(smaller_depth);
+
 	// find the cc of the color and depth image
 	ImageCC imageCC;
 	CEdgeDetector::analyze(smaller_color,smaller_depth,imageCC);

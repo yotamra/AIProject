@@ -63,7 +63,7 @@ void CEdgeDetector::calcLaplace(unsigned w,unsigned h,
 								Image& colorImage,Image& depthImage,
 								Image& dstImage,Image& depthLaplace,Image& hPic)
 {
-	IplImage* dstFrame = ((CPPImage*)dstImage.get())->get();
+	Mat* dstFrame = ((CPPImage*)dstImage.get())->get();
 
 	Matrix<double> mat(w,h,0.0);
 	Matrix<double> matDepth(w,h,0.0);
@@ -172,9 +172,9 @@ void CEdgeDetector::calcLaplace(unsigned w,unsigned h,
 			depth_diff_row++;
 		}
 	}
-
+	
 	// clean noise
-	cvSmooth( dstFrame,dstFrame, CV_MEDIAN,3);
+	cv::medianBlur(*dstFrame,*dstFrame,3);
 	
 	// draw line to seperate the top black
 	colorRow = dstImage->get_row(shiftSizeY);
@@ -213,9 +213,6 @@ All of that is saved in the ImageCC object- res.
 */
 void CEdgeDetector::analyze(Image& colorImage,Image& depthImage,ImageCC& res)
 {
-	// convert depth to gray - allready been done on the robot code
-	//depthImage = convert_to_gray(depthImage);
-
 	int w = ((CPPImage*)depthImage.get())->get_width();
 	int h = ((CPPImage*)depthImage.get())->get_height();
 
@@ -224,21 +221,7 @@ void CEdgeDetector::analyze(Image& colorImage,Image& depthImage,ImageCC& res)
 	Image hPic(new CPPImage(w,h,1));
 
 	calcLaplace(w,h,colorImage,depthImage,total_laplace,depth_laplace,hPic);
-	//
-	//IplImage *img = ((CPPImage*)total_laplace.get())->get();
-	//// Display the image.
- //   cvNamedWindow("Image:", CV_WINDOW_AUTOSIZE);
- //   cvShowImage("Image:", img);
 
- //  //  Wait for the user to press a key in the GUI window.
- //   cvWaitKey(0);
-
- //   // Free the resources.
- //   cvDestroyWindow("Image:");
- //   cvReleaseImage(&img);
-
-	//CFrameManager::displayImage(total_laplace);
-	//CFrameManager::displayImage(depth_laplace);
 	double now1 = GetTickCount();
 	invImage(total_laplace);
 
@@ -279,8 +262,8 @@ void CEdgeDetector::analyze(Image& colorImage,Image& depthImage,ImageCC& res)
 
 void CEdgeDetector::invImage(Image& src)
 {
-	IplImage* srcImg = ((CPPImage*)src.get())->get();
-	cvNot(srcImg,srcImg);
+	Mat* srcImg = ((CPPImage*)src.get())->get();
+	cv::bitwise_not(*srcImg,*srcImg);
 }
 void CEdgeDetector::cleanNoise(cc_list* src,int sizeLimit)
 {
@@ -361,22 +344,24 @@ struct ColData
 void CEdgeDetector::drawBottomLine(Image& src)
 {
 	//find the bottom row on the image
-	IplImage* img = ((CPPImage*)src.get())->get();
+	Mat* img = ((CPPImage*)src.get())->get();
 
 	int rowSum = 0;
 	int i = 0;
 
 	// search the bottom line until we hit a minimum sum
-	for(i=img->height-1; i>0; i--)
+	for(i=img->rows-1; i>0; i--)
 	{
 		rowSum = 0;
-		for(int j=FRAME_OFFSET; j<img->width-FRAME_OFFSET; j++)
+		double* mat_row = img->ptr<double>(i);
+		for(int j=FRAME_OFFSET; j<img->cols-FRAME_OFFSET; j++)
 		{
-			if (cvGet2D(img,i,j).val[0] != 0)
+			if (mat_row[j] != 0)
 			{
 				++rowSum;
 			}
 		}
+
 		if(rowSum > MIN_NUM_OF_PIXELS_ON_BOTTOM_LINE)
 		{
 			break;
@@ -386,15 +371,15 @@ void CEdgeDetector::drawBottomLine(Image& src)
 	int bottom = i-10;
 
 	int sub = 100;
-	if (bottom > (3/4)*img->height)
+	if (bottom > (3/4)*img->rows)
 	{
 		sub = 130;
 	}
 
 	int top = bottom - sub;
-	if (top  < img->height/2)
+	if (top  < img->rows/2)
 	{
-		top = img->height/2;
+		top = img->rows/2;
 	}
 	ColData cols[640/2] = {0,0,0,30,30};
 	int currMin = 50;
@@ -405,7 +390,7 @@ void CEdgeDetector::drawBottomLine(Image& src)
 	{
 		for (int t = top;t < bottom;++t)
 		{
-			if ((int)cvGet2D(img,t,k).val[0])
+			if ((int)cv::Scalar(img->at<uchar>(t, k)).val[0])
 			{
 				++cols[k].sum;
 				cols[k].lowestPixelLineNum = t;
@@ -414,7 +399,7 @@ void CEdgeDetector::drawBottomLine(Image& src)
 	}
 
 	// save only the cols that make a peak
-	for (int k = 6;k < img->width - 6;++k)
+	for (int k = 6;k < img->cols - 6;++k)
 	{
 		if ((cols[k].sum - cols[k+6].sum < 35) &&
 			(cols[k].sum - cols[k-6].sum < 35))
@@ -424,14 +409,14 @@ void CEdgeDetector::drawBottomLine(Image& src)
 	}
 
 	// calc for each peak it's distance from the next and prev peak
-	for (int k = 0;k < img->width;++k)
+	for (int k = 0;k < img->cols;++k)
 	{
 		if (cols[k].sum != 0)
 		{
 			int currCol = k;
 			int dist = 1;
 			++k;
-			while ((cols[k].sum == 0) && (k < img->width))
+			while ((cols[k].sum == 0) && (k < img->cols))
 			{
 				++k;
 				++dist;
@@ -443,7 +428,7 @@ void CEdgeDetector::drawBottomLine(Image& src)
 	}
 
 	// remove the peaks the are too close (from both sides) to another peak
-	for (int k = 0;k < img->width;++k)
+	for (int k = 0;k < img->cols;++k)
 	{
 		if (cols[k].sum != 0)
 		{
@@ -458,14 +443,14 @@ void CEdgeDetector::drawBottomLine(Image& src)
 	}
 
 	// paint a line in the lowest pixel of the peak 
-	for (int k = 0;k < img->width;++k)
+	for (int k = 0;k < img->cols;++k)
 	{
 		if (cols[k].sum != 0)
 		{
 			int currCol = k;
 			int dist = 1;
 			++k;
-			while ((cols[k].sum == 0) && (k < img->width))
+			while ((cols[k].sum == 0) && (k < img->cols))
 			{
 				++k;
 				++dist;
@@ -479,9 +464,9 @@ void CEdgeDetector::drawBottomLine(Image& src)
 				s = 0;
 			}
 			int e = k+50;
-			if (e > img->width)
+			if (e > img->cols)
 			{
-				e = img->width;
+				e = img->cols;
 			}
 			for(int j=s; j<e; j++)
 			{
@@ -490,7 +475,7 @@ void CEdgeDetector::drawBottomLine(Image& src)
 			--k;
 		}
 	}
-	for(int j=0; j<img->width; j++)
+	for(int j=0; j<img->cols; j++)
 	{
 		setVal(src,bottom,j,255);
 	}

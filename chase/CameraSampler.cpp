@@ -9,7 +9,7 @@ CameraSampler::CameraSampler()
   m_finished_init=false;
   m_Terminate = false;
   m_recored_image = false;
-  TakeSampleFromCamera = true;
+  TakeSampleFromCamera = false;
   frameNumber = 0;
   image_num = 0;
 }

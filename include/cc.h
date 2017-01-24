@@ -294,7 +294,7 @@ inline void findGeneral2DepthContainRatio(cc& generalCC, cc& depthCC,pair<double
 inline CPP::Image buildImageNoHoles(cc& c)
 {
 	CPP::Image ccImg = c.build_image();
-	IplImage* img = ((CPP::CPPImage*)ccImg.get())->get();
+	cv::Mat* img = ((CPP::CPPImage*)ccImg.get())->get();
 	//Image res(new CPPImage(img->width,img->height,1));
 	//IplImage* resImg = ((CPPImage*)res.get())->get();
 	int counter;
@@ -302,11 +302,11 @@ inline CPP::Image buildImageNoHoles(cc& c)
 	ushort shiftX = 2;
 	double val;
 	int t;
-	for (ushort i = 0;i < img->height;++i)
+	for (ushort i = 0;i < img->rows;++i)
 	{
-		for (ushort j = 0;j < img->width;++j)
+		for (ushort j = 0;j < img->cols;++j)
 		{
-			val = cvGet2D(img,i,j).val[0];
+			val = img->at<float>(i, j);
 			if (val > 0)
 				continue;
 
@@ -317,7 +317,7 @@ inline CPP::Image buildImageNoHoles(cc& c)
 			{
 				t = 0;
 			}
-			if (cvGet2D(img,t,j).val[0] > 0)
+			if (img->at<float>(t, j) > 0)
 			{
 				++counter;
 			}
@@ -327,27 +327,27 @@ inline CPP::Image buildImageNoHoles(cc& c)
 			{
 				t = 0;
 			}
-			if (cvGet2D(img,i,t).val[0] > 0)
+			if (img->at<float>(i, t) > 0)
 			{
 				++counter;
 			}
 
 			t = j+shiftX;
-			if (t >= img->width)
+			if (t >= img->cols)
 			{
-				t = img->width-2;
+				t = img->cols-2;
 			}
-			if (cvGet2D(img,i,t).val[0] > 0)
+			if (img->at<float>(i, t) > 0)
 			{
 				++counter;
 			}
 			
 			t = i+shiftY;
-			if (t >= img->height)
+			if (t >= img->rows)
 			{
-				t = img->height-1;
+				t = img->rows-1;
 			}
-			if (cvGet2D(img,t,j).val[0] > 0)
+			if (img->at<float>(t, j) > 0)
 			{
 				++counter;
 			}

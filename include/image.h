@@ -1,17 +1,22 @@
 #ifndef H_IMAGEPP
 #define H_IMAGEPP
 
+#include <Windows.h>
+#include <cv.hpp>
+
 #include <cxcore.h>
-#include <cv.h>
 #include <cvaux.h>
-#include <highgui.h>
 #include <boost/shared_ptr.hpp>
+
 #include <vector>
 #include <string>
 #include "prims.h"
 
+typedef unsigned char byte;
+
 namespace CPP {
 
+using cv::Mat;
 typedef std::pair<int,int> int_pair;
 
 inline void calculate_range(double* hist, int_pair& range, double edge)
@@ -30,14 +35,14 @@ inline void calculate_range(double* hist, int_pair& range, double edge)
   }
 }
 
-inline unsigned char* get_row(IplImage* image, int row)
+inline unsigned char* get_row(Mat* image, int row)
 {
-  return (unsigned char*)(image->imageData + row*image->widthStep);
+  return (unsigned char*)(image->data + row*image->step);
 }
 
 class CPPImage
 {
-  IplImage* m_Image;
+  cv::Mat* m_Image;
   bool      m_Failed;
 
   static CvSize size(unsigned w, unsigned h)
@@ -48,66 +53,55 @@ class CPPImage
     return sz;
   }
 public:
-  CPPImage(unsigned w, unsigned h, int channels,int depth = IPL_DEPTH_8U)
-    : m_Image(cvCreateImage(size(w,h),depth,channels)),
+  CPPImage(unsigned w, unsigned h, int channels,int depth = CV_8U)
+    : m_Image(new Mat(size(w,h),depth,channels)),
       m_Failed(false)
   {}
 
   CPPImage(const char* filename)
-    : m_Image(cvLoadImage(filename)),
+    : m_Image(new Mat(cv::imread(filename))),
       m_Failed(false)
   {
     if (!m_Image) m_Failed=true;
   }
 
   CPPImage(const std::string& filename)
-    : m_Image(cvLoadImage(filename.c_str())),
+    : m_Image(new Mat(cv::imread(filename.c_str()))),
       m_Failed(false)
   {
     if (!m_Image) m_Failed=true;
   }
 
-  CPPImage(IplImage* img)
-    : m_Image(cvCloneImage(img)),
+  CPPImage(Mat* img)
+    : m_Image(new Mat(img->clone())),
       m_Failed(false)
   {}
 
-  ~CPPImage()
-  {
-    cvReleaseImage(&m_Image);
-  }
+  ~CPPImage(){}
 
   bool failed() const { return m_Failed; }
 
   CPPImage* clone() 
   { 
-    unsigned y,w=get_width(),h=get_height(),c=get_channels();
-    CPPImage* img=new CPPImage(w,h,c);
-    unsigned pitch=w*c;
-    for(y=0;y<h;++y)
-    {
-      const byte* row=get_row(y);
-      byte* dst=img->get_row(y);
-      std::copy(row,row+pitch,dst);
-    }
+    CPPImage* img=new CPPImage(m_Image);
     return img;
   }
 
-  IplImage* get() { return m_Image; }
+  Mat* get() { return m_Image; }
 
   void save(const std::string& filename)
   {
-    cvSaveImage(filename.c_str(),m_Image);
+    cv::imwrite(filename.c_str(),*m_Image);
   }
 
   void save(const char* filename)
   {
-    cvSaveImage(filename,m_Image);
+	  cv::imwrite(filename,*m_Image);
   }
 
   unsigned get_pitch()
   {
-    return m_Image->widthStep;
+    return m_Image->step;
   }
 
   inline unsigned char* get_row(int row, int x=0)
@@ -124,10 +118,10 @@ public:
     return ptr;
   }
 
-  unsigned get_width()  const   { return m_Image->width; }
-  unsigned get_height() const   { return m_Image->height; }
-  unsigned get_channels() const { return m_Image->nChannels; }
-  Rect     get_rect() const     { return Rect(0,0,get_width(),get_height()); }
+  unsigned get_width()  const   { return m_Image->cols; }
+  unsigned get_height() const   { return m_Image->rows; }
+  unsigned get_channels() const { return m_Image->channels(); }
+  Rect     get_rect() const     { return Rect(0,0, m_Image->cols, m_Image->rows); }
 
   bool calculate_histogram(double* hist)
   {
@@ -148,16 +142,16 @@ typedef boost::shared_ptr<CPPImage> Image;
 
 inline Image load(const std::string& filename) { return Image(new CPPImage(filename)); }
 inline Image load(const char*        filename) { return Image(new CPPImage(filename)); }
-inline Image attach(IplImage* image) { return Image(new CPPImage(image)); }
+inline Image attach(Mat* image) { return Image(new CPPImage(image)); }
 
 class CPPKernel
 {
-  IplConvKernel* m_Kernel;
+  Mat* m_Kernel;
 public:
   // Create a structuring element of size w,h
   // anchor defaults to center
   // Use mask to specify content.  If mask is not used, a Rectangular element is used
-  CPPKernel(int w, int h, int anchor_x=-1, int anchor_y=-1, IplImage* mask=0)
+  CPPKernel(int w, int h, int anchor_x=-1, int anchor_y=-1, Mat* mask=0)
     : m_Kernel(0)
   {
     if (anchor_x<0) anchor_x=w/2;
@@ -171,20 +165,16 @@ public:
         unsigned char* ptr=get_row(mask,y);
         for(int x=0;x<w;++x,++it,++ptr) *it=*ptr;
       }
-      cvCreateStructuringElementEx(w,h,anchor_x,anchor_y,CV_SHAPE_CUSTOM,&values[0]);
+	  *m_Kernel = cv::getStructuringElement(CV_SHAPE_CUSTOM, cv::Size(w, h), cv::Point(anchor_x, anchor_y));
     }
     else
     {
-      cvCreateStructuringElementEx(w,h,anchor_x,anchor_y,CV_SHAPE_RECT);
+	  *m_Kernel = cv::getStructuringElement(CV_SHAPE_RECT,cv::Size(w, h), cv::Point(anchor_x, anchor_y));
     }
   }
 
-  ~CPPKernel()
-  {
-    cvReleaseStructuringElement(&m_Kernel);
-  }
-
-  IplConvKernel* get() { return m_Kernel; }
+  ~CPPKernel(){}
+  Mat* get() { return m_Kernel; }
 };
 
 typedef boost::shared_ptr<CPPKernel> Kernel;
@@ -192,70 +182,30 @@ typedef boost::shared_ptr<CPPKernel> Kernel;
 template<class T>
 class CPPMatrix
 {
-  CvMat* m_Matrix;
+  Mat* m_Matrix;
 
-  static int get_type(const char&) { return CV_8SC1; }
-  static int get_type(const int&) { return CV_32SC1; }
-  static int get_type(const float&) { return CV_32FC1; }
-  static int get_type(const double&) { return CV_64FC1; }
+  static int get_type(const char&) { return CV_8U; }
+  static int get_type(const int&) { return CV_32S; }
+  static int get_type(const float&) { return CV_32F; }
+  static int get_type(const double&) { return CV_64F; }
 public:
   CPPMatrix(int w, int h)
-    : m_Matrix(cvCreateMat(h,w,get_type(T())))
+    : m_Matrix(new Mat(h,w,get_type(T())))
   {}
 
-  ~CPPMatrix()
-  {
-    cvReleaseMat(&m_Matrix);
-  }
+  ~CPPMatrix(){}
 
-  const CvMat* get() const { return m_Matrix; }
-  CvMat* get() { return m_Matrix; }
+  const Mat* get() const { return m_Matrix; }
+  Mat* get() { return m_Matrix; }
 
   void fill(const T& value)
   {
-    cvFillImage(get(),value);
+	  *m_Matrix = value;
   }
 
   void set(int x, int y, const T& value)
   {
-    cvmSet(get(),y,x,value);
-  }
-};
-
-class BackgroundSubtract
-{
-  CvFGDStatModelParams m_ParamFGD;
-  CvBGStatModel*       m_BGModel;
-public:
-  BackgroundSubtract(Image first_frame)
-  {
-    m_ParamFGD.Lc = CV_BGFG_FGD_LC;
-    m_ParamFGD.N1c = CV_BGFG_FGD_N1C;
-    m_ParamFGD.N2c = CV_BGFG_FGD_N2C;
-    m_ParamFGD.Lcc = CV_BGFG_FGD_LCC;
-    m_ParamFGD.N1cc = CV_BGFG_FGD_N1CC;
-    m_ParamFGD.N2cc = CV_BGFG_FGD_N2CC;
-    m_ParamFGD.delta = CV_BGFG_FGD_DELTA;
-    m_ParamFGD.alpha1 = CV_BGFG_FGD_ALPHA_1;
-    m_ParamFGD.alpha2 = CV_BGFG_FGD_ALPHA_2;
-    m_ParamFGD.alpha3 = CV_BGFG_FGD_ALPHA_3;
-    m_ParamFGD.T = CV_BGFG_FGD_T;
-    m_ParamFGD.minArea = CV_BGFG_FGD_MINAREA;
-    m_ParamFGD.is_obj_without_holes = 1;
-    m_ParamFGD.perform_morphing = 1;
-    m_BGModel=cvCreateFGDStatModel(first_frame->get(),&m_ParamFGD);
-  }
-
-  ~BackgroundSubtract()
-  {
-    cvReleaseBGStatModel(&m_BGModel);
-  }
-
-  Image update(Image frame)
-  {
-    cvUpdateBGStatModel(frame->get(),m_BGModel);
-    IplImage* fg=cvCloneImage(m_BGModel->foreground);
-    return Image(new CPPImage(fg));
+	m_Matrix->at<T>(x, y) = value;
   }
 };
 
@@ -290,17 +240,11 @@ inline void paste(Image target, Image source, int ox, int oy)
 
 inline void and(Image a, Image b) // a&=b
 {
-  unsigned w=a->get_width(),h=a->get_height(),ch=a->get_channels();
-  if (w!=b->get_width() || h!=b->get_height() || ch!=b->get_channels())
-    throw std::string("and: Images mismatch");
-  unsigned pitch=w*ch;
-  for(unsigned y=0;y<h;++y)
-  {
-    byte* row=a->get_row(y);
-    const byte* src=b->get_row(y);
-    for(unsigned x=0;x<pitch;++x)
-      row[x]&=src[x];
-  }
+	unsigned w = a->get_width(), h = a->get_height(), ch = a->get_channels();
+	if (w != b->get_width() || h != b->get_height() || ch != b->get_channels())
+		throw std::string("and: Images mismatch");
+	Image c(new CPPImage(w, h, ch));
+	cv::bitwise_and(*a->get(), *b->get(), *a->get());
 }
 
 inline Image or(Image a, Image b)
@@ -309,7 +253,7 @@ inline Image or(Image a, Image b)
   if (w!=b->get_width() || h!=b->get_height() || ch!=b->get_channels())
     throw std::string("and: Images mismatch");
   Image c(new CPPImage(w,h,ch));
-  cvOr(a->get(),b->get(),c->get());
+  cv::bitwise_or(*a->get(),*b->get(),*c->get());
   return c;
 }
 
@@ -319,64 +263,35 @@ inline Image xor(Image a, Image b)
   if (w!=b->get_width() || h!=b->get_height() || ch!=b->get_channels())
     throw std::string("and: Images mismatch");
   Image c(new CPPImage(w,h,ch));
-  cvXor(a->get(),b->get(),c->get());
+  cv::bitwise_xor(*a->get(), *b->get(), *c->get());
   return c;
 }
 
 inline void fill(Image image, unsigned char value)
 {
-  int w=image->get_width(),h=image->get_height(),channels=image->get_channels();
-  int pitch=w*channels;
-  for(int y=0;y<h;++y)
-  {
-    unsigned char* row=image->get_row(y);
-    std::fill_n(row,pitch,value);
-  }
+	*image->get() = value;
 }
 
 inline Image flip_vertical(Image image)
 {
   int w=image->get_width(),h=image->get_height(),n=image->get_channels();
-  int pitch=w*n;
   Image target(new CPPImage(w,h,n));
-  for(int y=0;y<=h/2;++y)
-  {
-    int y2=h-y-1;
-    if (y2==y) continue;
-    const unsigned char* row1=image->get_row(y);
-    const unsigned char* row2=image->get_row(y2);
-    unsigned char* dst1=target->get_row(y);
-    unsigned char* dst2=target->get_row(y2);
-    for(int x=0;x<pitch;++x)
-    {
-      dst1[x]=row2[x];
-      dst2[x]=row1[x];
-    }
-  }
+  flip(*image->get(), *target->get(), 0);
   return target;
 }
 
 inline Image rotate_90(Image image, bool clockwise)
 {
-  int w=image->get_width(),h=image->get_height(),n=image->get_channels();
-  Image target(new CPPImage(h,w,n));
-  for(int y=0;y<h;++y)
-  {
-    const unsigned char* row=image->get_row(y);
-    for(int x=0;x<w;++x)
-    {
-      unsigned char* dst=target->get_row(x,y);
-      std::copy(row,row+n,dst);
-      row+=n;
-    }
-  }
+	int w = image->get_width(), h = image->get_height(), n = image->get_channels();
+	Image target(new CPPImage(h, w, n));
+	flip(*image->get(), *target->get(), 1);
   return target;
 }
 
 inline Image median_filter(Image image)
 {
   Image target(image->clone());
-  cvSmooth(image->get(),target->get(),CV_MEDIAN);
+  cv::medianBlur(*image->get(),*target->get(),3);
   return target;
 }
 
@@ -416,36 +331,17 @@ inline Image mass_filter(Image image, int mass)
 inline Image sobel(Image image, int xorder, int yorder, int apperture=3)
 {
   Image target(image->clone());
-  cvSobel(image->get(),target->get(),xorder,yorder,apperture);
+  cv::Sobel(*image->get(),*target->get(), CV_8U, xorder,yorder,apperture);
   return target;
 }
 
-inline Image laplace(Image& image, int apperture=3)
+inline Image laplace(Image& image, int apperture=1)
 {
-	/*Image dst;
 	CPPImage* img = ((CPPImage*)image.get());
-	int kernel[] = {0,-1,0,
-					-1,4,-1,
-					0,-1,0};
-	CvMat* filter = cvCreateMatHeader(3,3,CV_8UC1);
-	cvSetData(filter,kernel,3*8);
-	cvFilter2D(img->get(),img->get(),filter);
-	return image;*/
-
-	  CPPImage* img = ((CPPImage*)image.get());
-  IplImage* im2 = cvCreateImage(cvGetSize(img->get()),
-		IPL_DEPTH_32F, 1);
-  cvLaplace(img->get(),im2,apperture);
-
-	// //32 bit floating point image
-	//IplImage *image2 = cvCreateImage(cvSize(im2->width,im2->height), IPL_DEPTH_8U, 1);
-
-	////Convert image depth to image2 depth
-	//cvConvertScale(im2,image2);
-
- // return Image(new CPPImage(image2));
-  return Image(new CPPImage(im2));
-	
+	Mat* im2 = new Mat(cvGetSize(img->get()),
+		CV_8U, 1);
+	cv::Laplacian(*img->get(),*im2,CV_8U,apperture);
+	return Image(new CPPImage(im2));
 }
 
 inline Image scale_to(Image image, int w, int h, int interpolation=1)
@@ -453,21 +349,21 @@ inline Image scale_to(Image image, int w, int h, int interpolation=1)
   if (w<1) w=1;
   if (h<1) h=1;
   Image target(new CPPImage(w,h,image->get_channels()));
-  cvResize(image->get(),target->get(),interpolation);
+  cv::resize(*image->get(),*target->get(),cv::Size(w,h),0,0,interpolation);
   return target;
 }
 
 inline Image erode(Image image, int iter=1)
 {
   Image target(image->clone());
-  cvErode(image->get(),target->get(),0,iter);
+  cv::erode(*image->get(),*target->get(),0,cv::Point(-1,-1),iter);
   return target;
 }
 
 inline Image erode(Image image, Kernel kernel, int iter=1)
 {
   Image target(image->clone());
-  cvErode(image->get(),target->get(),kernel->get(),iter);
+  cv::erode(*image->get(), *target->get(), *kernel->get(), cv::Point(-1, -1), iter);
   return target;
 }
 
@@ -481,42 +377,42 @@ inline Image dilate(Image image, int iter=1)
 inline Image dilate(Image image, Kernel kernel, int iter=1)
 {
   Image target(image->clone());
-  cvDilate(image->get(),target->get(),kernel->get(),iter);
+  cv::dilate(*image->get(),*target->get(),*kernel->get(),cv::Point(-1,-1),iter);
   return target;
 }
 
 inline Image morphology_open(Image image, Kernel kernel, int iter=1)
 {
   Image target(image->clone());
-  cvMorphologyEx(image->get(),target->get(),0,kernel->get(),CV_MOP_OPEN,iter);
+  cv::morphologyEx(*image->get(),*target->get(), cv::MORPH_ERODE,*kernel->get(), cv::Point(-1, -1),iter, CV_MOP_OPEN);
   return target;
 }
 
 inline Image morphology_close(Image image, Kernel kernel, int iter=1)
 {
   Image target(image->clone());
-  cvMorphologyEx(image->get(),target->get(),0,kernel->get(),CV_MOP_CLOSE,iter);
+  cv::morphologyEx(*image->get(), *target->get(), cv::MORPH_ERODE, *kernel->get(), cv::Point(-1, -1), iter, CV_MOP_CLOSE);
   return target;
 }
 
 inline Image morphology_tophat(Image image, Kernel kernel, int iter=1)
 {
   Image target(image->clone());
-  cvMorphologyEx(image->get(),target->get(),0,kernel->get(),CV_MOP_TOPHAT,iter);
+  cv::morphologyEx(*image->get(), *target->get(), cv::MORPH_ERODE, *kernel->get(), cv::Point(-1, -1), iter, CV_MOP_TOPHAT);
   return target;
 }
 
 inline Image morphology_blackhat(Image image, Kernel kernel, int iter=1)
 {
   Image target(image->clone());
-  cvMorphologyEx(image->get(),target->get(),0,kernel->get(),CV_MOP_BLACKHAT,iter);
+  cv::morphologyEx(*image->get(), *target->get(), cv::MORPH_ERODE, *kernel->get(), cv::Point(-1, -1), iter, CV_MOP_BLACKHAT);
   return target;
 }
 
 inline Image smooth(const Image& image)
 {
   Image target(image->clone());
-  cvSmooth(image->get(),target->get(),CV_GAUSSIAN,7,7,5);
+  cv::GaussianBlur(*image->get(), *target->get(),cv::Size(7,7), 5);
   return target;
 }
 
@@ -524,14 +420,14 @@ template<class T>
 inline Image filter(const Image& image, const CPPMatrix<T>& matrix)
 {
   Image target(image->clone());
-  cvFilter2D(image->get(),target->get(),matrix.get());
+  cv::filter2D(*image->get(), *target->get(),image->get()->depth(),*matrix.get());
   return target;
 }
 
 inline Image threshold(const Image& image, double thres)
 {
   Image target(image->clone());
-  cvThreshold(image->get(),target->get(),thres,255,CV_THRESH_BINARY);
+  cv::threshold(*image->get(),*target->get(),thres,255, cv::THRESH_BINARY);
   return target;
 }
 
@@ -539,7 +435,7 @@ inline Image convert_to_gray(const Image& image)
 {
   if (image->get_channels()==1) return image;
   Image target(new CPPImage(image->get_width(),image->get_height(),1));
-  cvCvtColor(image->get(),target->get(),CV_RGB2GRAY);
+  cv::cvtColor(*image->get(),*target->get(),CV_RGB2GRAY);
   return target;
 }
 
@@ -547,7 +443,7 @@ inline Image convert_to_rgb(const Image& image)
 {
   if (image->get_channels()==3) return image;
   Image target(new CPPImage(image->get_width(),image->get_height(),3));
-  cvCvtColor(image->get(),target->get(),CV_GRAY2RGB);
+  cv::cvtColor(*image->get(),*target->get(),CV_GRAY2RGB);
   return target;
 }
 
@@ -555,7 +451,7 @@ inline Image convert_to_rgb(const Image& image)
 inline Image convert_bgr_to_hsi(const Image& image)
 {
   Image target(new CPPImage(image->get_width(),image->get_height(),3));
-  cvCvtColor(image->get(),target->get(),CV_BGR2HSV);
+  cv::cvtColor(*image->get(), *target->get(),CV_BGR2HSV);
   return target;
 }
 
@@ -571,18 +467,18 @@ inline void imagePow(const Image& image,const Image& dst,double power)
 }
 inline double getVal(const Image& image,int i,int j)
 {
-	CvScalar& f = cvGet2D(((CPPImage*)image.get())->get(),i,j);
-	return f.val[0];
+	cv::Scalar S(((CPPImage*)image.get())->get()->at<uchar>(j, i));
+	return S.val[0];
 }
 inline void setVal(const Image& image,int i,int j,double val)
 {
-	return cvSet2D(((CPPImage*)image.get())->get(),i,j,cvScalar(val));
+	((CPPImage*)image.get())->get()->at<uchar>(i, j) = val;
 }
 
 inline Image abs_diff(const Image& imga, const Image& imgb)
 {
   Image target(imga->clone());
-  cvAbsDiff(imga->get(),imgb->get(),target->get());
+  cv::absdiff(*imga->get(),*imgb->get(),*target->get());
   return target;
 }
 
@@ -607,22 +503,17 @@ inline Rect bounding_rect(const Image& img, byte bg=0)
   return r;
 }
 
-inline Image crop(const Image& img, const Rect& r)
+inline Image crop(const Image& img, const cv::Rect& r)
 //IplImage *BasicOpenCV::Crop(IplImage *image,CvRect selection)
 {
-  IplImage* src=img->get();
-  IplImage* dst = cvCreateImage(cvSize(r.width(), r.height()),src->depth,src->nChannels);
-  dst->origin = src->origin;
-  CvRect area=cvRect(r.l,r.t,r.width(),r.height());
-  cvSetImageROI(src,area);
-  cvCopy(src, dst);
-  cvResetImageROI(src);
+  Mat src=*img->get();
+  Mat* dst = new Mat(src(r).clone());
   return Image(new CPPImage(dst));
 }
 
 inline Image copy(const Image& img)
 {
-  return crop(img,Rect(0,0,img->get_width(),img->get_height()));
+  return crop(img,cv::Rect(0,0,img->get_width(),img->get_height()));
 }
 
 inline void scale_color_space(Image& image, int_pair& range)

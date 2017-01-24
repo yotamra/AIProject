@@ -43,8 +43,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Program Files\MobileRobots\ARIA\include;C:\OpenCV2.1\include\opencv;C:\boost_1_56_0;$(SolutionDir)include;$(SolutionDir)extract_man_lib;$(SolutionDir)libsensor;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Program Files\MobileRobots\ARIA\lib;C:\Program Files %28x86%29\OpenNI\Lib;C:\OpenCV2.1\lib;C:\boost_1_55_0\libs;$(SolutionDir)$(Configuration)\;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Program Files\MobileRobots\ARIA\include;C:\OpenCV3.2\opencv\build\include\opencv;C:\boost_1_56_0;$(SolutionDir)include;$(SolutionDir)extract_man_lib;$(SolutionDir)libsensor;C:\OpenCV3.2\opencv\build\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files\MobileRobots\ARIA\lib;C:\Program Files %28x86%29\OpenNI\Lib;C:\OpenCV3.2\opencv\build\x86\vc12\lib;C:\boost_1_55_0\libs;$(SolutionDir)$(Configuration)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -62,7 +62,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>OpenNI.lib;cv210.lib;cxcore210.lib;highgui210.lib;AriaDebugVC10.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>OpenNI.lib;opencv_world320.lib;AriaDebugVC10.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

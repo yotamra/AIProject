@@ -114,7 +114,7 @@ void paintResults(Image* colorImage,unsigned int leftCorridor,
 	}
 
 	// paint the direction
-	IplImage *img = ((CPPImage*)colorImage->get())->get();
+	Mat *img = ((CPPImage*)colorImage->get())->get();
 	if (direction == STRAIGHT)
 	{
 		CvPoint  curve1[]={290,65,  350,65,  320,30};
@@ -179,8 +179,8 @@ void paintDoor(Door& door,Image* image)
 
 void Corridor::findDoorInSide(Image& grayImage, Door& door, bool isLeft) //unsigned int floorLine //unsigned int leftCorridor,unsigned int rightCorridor,
 {
-	unsigned int w = ((CPPImage*)grayImage.get())->get()->width;
-	unsigned int h = ((CPPImage*)grayImage.get())->get()->height;
+	unsigned int w = ((CPPImage*)grayImage.get())->get()->cols;
+	unsigned int h = ((CPPImage*)grayImage.get())->get()->rows;
 
 	door.first = ILLEGAL_COORD;
 	door.second = ILLEGAL_COORD;
@@ -334,7 +334,7 @@ void Corridor::findDoors(CPP::Image* colorImage,unsigned int leftCorridor,unsign
 	leftDoor.second = ILLEGAL_COORD;
 	if (leftCorridor > 10)
 	{
-		Rect leftRect(0,0,leftCorridor,310);
+		cv::Rect leftRect(0,0,leftCorridor,310);
 		Image leftImage = crop(*colorImage, leftRect);
 		
 		findDoorInSide(leftImage, leftDoor, true);
@@ -343,7 +343,7 @@ void Corridor::findDoors(CPP::Image* colorImage,unsigned int leftCorridor,unsign
 	rightDoor.second = ILLEGAL_COORD;
 	if (rightCorridor < 630)
 	{
-		Rect rightRect(rightCorridor,0,640,310);
+		cv::Rect rightRect(rightCorridor,0,640,310);
 		Image rightImage = crop(*colorImage, rightRect);
 		
 		findDoorInSide(rightImage, rightDoor, false);
@@ -798,7 +798,7 @@ Corridor::Corridor(Map* mapInstance, map<int, MapCell>* leftDoorsSerialToMapCell
 
 void paintFoundDoorNum(Image* colorImage,int foundDoorNum)
 {
-	IplImage *img = ((CPPImage*)colorImage->get())->get();
+	Mat *img = ((CPPImage*)colorImage->get())->get();
 
 	// paint the number of found door
 	if (foundDoorNum != -1)
@@ -846,7 +846,7 @@ bool Corridor::goToNextDoor(Image* colorImage,map<int, MapCell>* corrDoorsSerial
 
 void paintArrived(CPP::Image* resImage)
 {
-	IplImage *img = ((CPPImage*)resImage->get())->get();
+	Mat *img = ((CPPImage*)resImage->get())->get();
 	string str("Arrived");
 	
 	CvFont font;

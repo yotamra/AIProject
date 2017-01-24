@@ -51,7 +51,7 @@
     <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
     <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\extract_man_lib;C:\Program Files %28x86%29\OpenNI\Include;C:\boost_1_56_0;C:\OpenCV2.1\include\opencv;$(SolutionDir)include;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\extract_man_lib;C:\Program Files %28x86%29\OpenNI\Include;C:\boost_1_56_0;C:\OpenCV3.2\opencv\build\include\opencv;$(SolutionDir)include;C:\OpenCV3.2\opencv\build\include;$(IncludePath)</IncludePath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\extract_man_lib;C:\Program Files %28x86%29\OpenNI\Include;C:\boost_1_56_0;C:\OpenCV2.1\include\opencv;$(SolutionDir)include;$(IncludePath)</IncludePath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     </LibraryPath>

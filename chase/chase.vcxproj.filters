@@ -1032,5 +1032,6 @@
     <None Include="AriaVC10.dll">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>

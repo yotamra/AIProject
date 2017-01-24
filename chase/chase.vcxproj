@@ -53,8 +53,8 @@
     <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
     <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\Program Files\MobileRobots\ARIA\include;C:\Program Files %28x86%29\OpenNI\Include;$(SolutionDir)extract_man_lib;$(SolutionDir)include;C:\boost_1_56_0;C:\OpenCV2.1\include\opencv;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\Program Files\MobileRobots\ARIA\lib;C:\boost_1_56_0\libs;C:\Program Files %28x86%29\OpenNI\Lib;C:\OpenCV2.1\lib;$(SolutionDir)$(Configuration);$(LibraryPath)</LibraryPath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\Program Files\MobileRobots\ARIA\include;C:\Program Files %28x86%29\OpenNI\Include;$(SolutionDir)extract_man_lib;$(SolutionDir)include;C:\boost_1_56_0;C:\OpenCV3.2\opencv\build\include\opencv;C:\OpenCV3.2\opencv\build\include;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\Program Files\MobileRobots\ARIA\lib;C:\boost_1_56_0\libs;C:\Program Files %28x86%29\OpenNI\Lib;C:\OpenCV3.2\opencv\build\x86\vc12\lib;$(SolutionDir)$(Configuration);$(LibraryPath)</LibraryPath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\Program Files\MobileRobots\ARIA\include;C:\Program Files %28x86%29\OpenNI\Include;$(SolutionDir)extract_man_lib;$(SolutionDir)include;C:\boost_1_56_0;C:\OpenCV2.1\include\opencv;$(IncludePath)</IncludePath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\Program Files\MobileRobots\ARIA\lib;C:\boost_1_56_0\libs;C:\Program Files %28x86%29\OpenNI\Lib;C:\OpenCV2.1\lib;$(SolutionDir)$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
@@ -63,7 +63,7 @@
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>
       </AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;NO_ROBOT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -74,8 +74,8 @@
       <DisableSpecificWarnings>4786;4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>;OpenNI.lib;cv210.lib;cxcore210.lib;highgui210.lib;extract_man_lib.lib;winmm.lib;User32.lib;AriaDebugVC10.lib;</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Program Files\OpenNI\Lib;$(SolutionDir)$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>OpenNI.lib;opencv_world320.lib;extract_man_lib.lib;winmm.lib;User32.lib;AriaDebugVC10.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Program Files\OpenNI\Lib;$(SolutionDir)$(Configuration);C:\OpenCV3.2\opencv\build\x86\vc12\lib</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
@@ -168,6 +168,7 @@ xcopy  /E /D /I "$(ProjectDir)sounds" "$(SolutionDir)$(Configuration)\sounds"</C
   <ItemGroup>
     <None Include="AriaDebugVC10.dll" />
     <None Include="AriaVC10.dll" />
+    <None Include="ClassDiagram.cd" />
     <None Include="classifier.xml" />
     <None Include="sounds\iface\sound1.mp3" />
     <None Include="sounds\iface\sound10.mp3" />

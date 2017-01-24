@@ -8,28 +8,28 @@ void FallDetector::print_person_location(Image& depth_image, Image& person, int 
   int w = ((CPPImage*)person.get())->get_width() * 2;
   int h = ((CPPImage*)person.get())->get_height() * 2;
 
-  IplImage* img = ((CPPImage*)depth_image.get())->get();
-  for(int j=0; j<img->width; j++)
+  Mat* img = ((CPPImage*)depth_image.get())->get();
+  for(int j=0; j<img->cols; j++)
   {
     setVal(depth_image,person_y,j,255);
   }
-  for(int j=0; j<img->width; j++)
+  for(int j=0; j<img->cols; j++)
   {
     setVal(depth_image,person_y+ h,j,255);
   }
-  for(int i=0; i<img->height; i++)
+  for(int i=0; i<img->rows; i++)
   {
     setVal(depth_image,i,person_x,255);
   }
-  for(int i=0; i<img->height; i++)
+  for(int i=0; i<img->rows; i++)
   {
     setVal(depth_image,i,person_x +w,255);
   }
-  for(int j=0; j<img->width; j++)
+  for(int j=0; j<img->cols; j++)
   {
     setVal(depth_image,(int)center_y,j,150);
   }
-  for(int i=0; i<img->height; i++)
+  for(int i=0; i<img->rows; i++)
   {
     setVal(depth_image,i,(int)center_x,150);
   }
