@@ -211,6 +211,326 @@ Uses the color image and depth image to calculate the connected components by bo
 Also, saves a vector that maps a connected component to its depth.
 All of that is saved in the ImageCC object- res.
 */
+
+void CEdgeDetector::hsvdCanny(Image& colorImage, Image& depthImage, Image& total_result,
+							   int upperThreshold, int lowerThreshold, double size = 3)
+{
+	Mat rgbImageWc = colorImage->get()->clone();
+	Mat depthImageWc = depthImage->get()->clone();
+	
+	// Step 1 blurring the Image using Gaussian
+	Mat greyMatWithoutbf = Mat(rgbImageWc.rows, rgbImageWc.cols, CV_8UC1);
+	Mat greyMat = Mat(rgbImageWc.rows, rgbImageWc.cols, CV_8UC1);
+	Mat HsvMatWithoutbf = Mat(rgbImageWc.rows, rgbImageWc.cols, CV_8UC3);
+	Mat HsvMat = Mat(rgbImageWc.rows, rgbImageWc.cols, CV_8UC3);
+	cv::cvtColor((rgbImageWc + cv::Scalar(-50, -50, -50)), HsvMatWithoutbf, cv::COLOR_BGR2HSV);
+	cv::cvtColor(*colorImage->get(), greyMatWithoutbf, cv::COLOR_BGR2GRAY);
+
+	cv::bilateralFilter(greyMatWithoutbf, greyMat, 5, 500, 500);
+	cv::bilateralFilter(HsvMatWithoutbf, HsvMat, 5, 500, 500);
+	cv::bilateralFilter(*depthImage->get(), depthImageWc, 5, 500, 500);
+
+	//cv::GaussianBlur(greyMat, greyMat, cv::Size(5, 5), 1.4);
+	//cv::GaussianBlur(depthImageWc, depthImageWc, cv::Size(5, 5), 1.4);
+
+	// Step 2 converting all the images to single channel mats so we can apply canny edge detector.
+	if (rgbImageWc.channels() != 3 || depthImageWc.channels() != 1)
+	{
+		throw "Channels are not match canny expectation";
+	}
+	if ((rgbImageWc.cols != depthImageWc.cols) || (rgbImageWc.rows != depthImageWc.rows))
+	{
+		throw "RGB and DEPTH Images are of diffrent sizes";
+	}
+	int w = rgbImageWc.cols;
+	int h = rgbImageWc.rows;
+	// Step 3 calculating the gradient magnitude and direction
+
+	Mat magDepthX = Mat(h, w, CV_32F);
+	Mat magDepthY = Mat(h, w, CV_32F);
+	Mat magGreyX = Mat(h, w, CV_32F);
+	Mat magGreyY = Mat(h, w, CV_32F);
+
+	Mat magHSVHX = Mat(h, w, CV_32F);
+	Mat magHSVHY = Mat(h, w, CV_32F);
+	Mat magHSVSX = Mat(h, w, CV_32F);
+	Mat magHSVSY = Mat(h, w, CV_32F);
+	Mat magHSVVX = Mat(h, w, CV_32F);
+	Mat magHSVVY = Mat(h, w, CV_32F);
+
+	cv::Sobel(depthImageWc, magDepthX, CV_32F, 1, 0, size);
+	cv::Sobel(depthImageWc, magDepthY, CV_32F, 0, 1, size);
+	cv::Sobel(greyMat, magGreyX, CV_32F, 1, 0, size);
+	cv::Sobel(greyMat, magGreyY, CV_32F, 0, 1, size);
+
+	cv::Sobel(greyMat, magHSVHX, CV_32F, 1, 0, size);
+	cv::Sobel(greyMat, magHSVHY, CV_32F, 0, 1, size);
+	cv::Sobel(greyMat, magHSVSX, CV_32F, 1, 0, size);
+	cv::Sobel(greyMat, magHSVSY, CV_32F, 0, 1, size);
+	cv::Sobel(greyMat, magHSVVX, CV_32F, 1, 0, size);
+	cv::Sobel(greyMat, magHSVVY, CV_32F, 0, 1, size);
+
+	// Step 4 calculating the slops at each point dx/dy.
+	Mat directionDepth = Mat(h, w, CV_32F);
+	Mat directionGrey = Mat(h, w, CV_32F);
+
+	Mat directionHSVH = Mat(h, w, CV_32F);
+	Mat directionHSVS = Mat(h, w, CV_32F);
+	Mat directionHSVV = Mat(h, w, CV_32F);
+
+	cv::divide(magDepthY, magDepthX, directionDepth);
+	cv::divide(magGreyY, magGreyX, directionGrey);
+
+	cv::divide(magHSVHY, magHSVHX, directionHSVH);
+	cv::divide(magHSVSY, magHSVSX, directionHSVS);
+	cv::divide(magHSVVY, magHSVVX, directionHSVV);
+
+	// Step 5 calculating the magnitude of the gradient at each pixel. formula: sqrt(Gx^2+Gy^2)
+	Mat depthSum = Mat(h, w, CV_64F);
+	Mat greySum = Mat(h, w, CV_64F);
+
+	Mat hsvhSum = Mat(h, w, CV_64F);
+	Mat hsvsSum = Mat(h, w, CV_64F);
+	Mat hsvvSum = Mat(h, w, CV_64F);
+
+	Mat depthXsqure = Mat(h, w, CV_64F);
+	Mat depthYsqure = Mat(h, w, CV_64F);
+	Mat greyXsqure = Mat(h, w, CV_64F);
+	Mat greyYsqure = Mat(h, w, CV_64F);
+
+	Mat hsvhXsqure = Mat(h, w, CV_64F);
+	Mat hsvhYsqure = Mat(h, w, CV_64F);
+	Mat hsvsXsqure = Mat(h, w, CV_64F);
+	Mat hsvsYsqure = Mat(h, w, CV_64F);
+	Mat hsvvXsqure = Mat(h, w, CV_64F);
+	Mat hsvvYsqure = Mat(h, w, CV_64F);
+
+	cv::multiply(magDepthX, magDepthX, depthXsqure);
+	cv::multiply(magDepthY, magDepthY, depthYsqure);
+	cv::multiply(magGreyX, magGreyX, greyXsqure);
+	cv::multiply(magGreyY, magGreyY, greyYsqure);
+
+	cv::multiply(magHSVHX, magHSVHX, hsvhXsqure);
+	cv::multiply(magHSVHY, magHSVHY, hsvhYsqure);
+	cv::multiply(magHSVSX, magHSVSX, hsvsXsqure);
+	cv::multiply(magHSVSY, magHSVSY, hsvsYsqure);
+	cv::multiply(magHSVVX, magHSVVX, hsvvXsqure);
+	cv::multiply(magHSVVY, magHSVVY, hsvvYsqure);
+
+	depthSum = depthXsqure + depthYsqure;
+	greySum = greyXsqure + greyYsqure;
+
+	hsvhSum = hsvhXsqure + hsvhYsqure;
+	hsvsSum = hsvsXsqure + hsvsYsqure;
+	hsvvSum = hsvvXsqure + hsvvYsqure;
+
+	cv::sqrt(depthSum, depthSum);
+	cv::sqrt(greySum, greySum);
+
+	cv::sqrt(hsvhSum, hsvhSum);
+	cv::sqrt(hsvsSum, hsvsSum);
+	cv::sqrt(hsvvSum, hsvvSum);
+
+	// Step 6 calculating wighted mean value between (1*r+1*g+1*b+3*d)/6
+	Mat meanGradientMat = Mat(h, w, CV_64F);
+	Mat meanDirectionMat = Mat(h, w, CV_64F);
+	meanGradientMat =  (hsvhSum + hsvsSum + hsvvSum + (depthSum * 3))/6;
+	meanDirectionMat = (directionHSVH + directionHSVS + directionHSVV /*+ (directionDepth*3)*/)/3;
+
+	// Step 7 Nonmaximum suppression
+	// Initialize result Image and iterators 
+	Mat resultImg = Mat(h, w, CV_8U);
+	resultImg.setTo(cv::Scalar(0));						
+
+	cv::MatIterator_<float>itMag = meanGradientMat.begin<float>();
+	cv::MatIterator_<float>itDirection = meanDirectionMat.begin<float>();
+	cv::MatIterator_<unsigned char>itRet = resultImg.begin<unsigned char>();
+	cv::MatIterator_<float>itend = meanGradientMat.end<float>();
+
+	for (;itMag != itend;++itDirection, ++itRet, ++itMag) {
+		const cv::Point pos = itRet.pos();
+		float currentDirection = atan(*itDirection) * 180 / 3.142;
+		while (currentDirection < 0) currentDirection += 180;
+		*itDirection = currentDirection;
+		if (*itMag < upperThreshold) continue;
+
+		bool pixelIsEdge = true;
+		if (currentDirection>112.5 && currentDirection <= 157.5)
+		{
+			if (pos.y > 0 && pos.x < w - 1 && *itMag <= meanGradientMat.at<float>(pos.y - 1, pos.x + 1))
+				pixelIsEdge = false;
+			if (pos.y < h - 1 && pos.x > 0 && *itMag <= meanGradientMat.at<float>(pos.y + 1, pos.x - 1))
+				pixelIsEdge = false;
+		} 
+		else if (currentDirection>67.5 && currentDirection <= 112.5)
+		{ 
+			if (pos.y>0 && *itMag <= meanGradientMat.at<float>(pos.y - 1, pos.x))
+				pixelIsEdge = false;
+			if (pos.y < h - 1 && *itMag <= meanGradientMat.at<float>(pos.y + 1, pos.x))
+				pixelIsEdge = false; }
+		else if (currentDirection > 22.5 && currentDirection <= 67.5)
+		{
+			if (pos.y>0 && pos.x>0 && *itMag <= meanGradientMat.at<float>(pos.y - 1, pos.x - 1))
+				pixelIsEdge = false;
+			if (pos.y < h - 1 && pos.x  <w - 1 && *itMag <= meanGradientMat.at<float>(pos.y + 1, pos.x + 1))
+				pixelIsEdge = false; }
+		else 
+		{
+			if (pos.x>0 && *itMag <= meanGradientMat.at<float>(pos.y, pos.x - 1))
+				pixelIsEdge = false;
+			if (pos.x < w - 1 && *itMag <= meanGradientMat.at<float>(pos.y, pos.x + 1))
+				pixelIsEdge = false; 
+		}
+		if (pixelIsEdge)
+		{ 
+			*itRet = 255;
+		}
+	} 
+	
+	//Step 8 Thresholding with hysteresis
+	bool imageChanged = true;
+	int i=0; 
+	while(imageChanged) 
+	{
+		imageChanged = false;
+		i++; 
+		itMag = meanGradientMat.begin<float>();
+		itDirection = meanDirectionMat.begin<float>();
+		itRet = resultImg.begin<unsigned char>();
+		itend = meanGradientMat.end<float>();
+		for (;itMag != itend;++itMag, ++itDirection, ++itRet)
+		{
+			cv::Point pos = itRet.pos();
+			if (pos.x<2 || pos.x > w - 2 || pos.y<2 || pos.y > h - 2)
+				continue;
+			float currentDirection = *itDirection;
+			if (*itRet == 255) {
+				*itRet = (unsigned char)64;
+				if (currentDirection>112.5 && currentDirection <= 157.5)
+				{ 
+					if (pos.y>0 && pos.x>0)
+					{
+						if (lowerThreshold <= meanGradientMat.at<float>(pos.y - 1, pos.x - 1) &&
+							resultImg.at<unsigned char>(pos.y - 1, pos.x - 1) != 64 &&
+							meanDirectionMat.at<float>(pos.y - 1, pos.x - 1) > 112.5 &&
+							meanDirectionMat.at<float>(pos.y - 1, pos.x - 1) <= 157.5 &&
+							meanGradientMat.at<float>(pos.y - 1, pos.x - 1) > meanGradientMat.at<float>(pos.y - 2, pos.x) &&
+							meanGradientMat.at<float>(pos.y - 1, pos.x - 1) > meanGradientMat.at<float>(pos.y, pos.x - 2))
+						{
+							resultImg.ptr<unsigned char>(pos.y - 1, pos.x - 1)[0] = 255;
+							imageChanged = true;
+						} 
+					}
+					if (pos.y<h - 1 && pos.x<w - 1)
+					{
+						if (lowerThreshold <= meanGradientMat.at<float>(cv::Point(pos.x + 1, pos.y + 1)) &&
+							resultImg.at<unsigned char>(pos.y + 1, pos.x + 1) != 64 &&
+							meanDirectionMat.at<float>(pos.y + 1, pos.x + 1) > 112.5 &&
+							meanDirectionMat.at<float>(pos.y + 1, pos.x + 1) <= 157.5 &&
+							meanGradientMat.at<float>(pos.y - 1, pos.x - 1) > meanGradientMat.at<float>(pos.y + 2, pos.x) &&
+							meanGradientMat.at<float>(pos.y - 1, pos.x - 1) > meanGradientMat.at<float>(pos.y, pos.x + 2))
+						{ 
+							resultImg.ptr<unsigned char>(pos.y + 1, pos.x + 1)[0] = 255;
+							imageChanged = true; } 
+					} 
+				} 
+				else if (currentDirection>67.5 && currentDirection <= 112.5)
+				{
+					if (pos.x > 0)
+					{
+						if (lowerThreshold <= meanGradientMat.at<float>(cv::Point(pos.x - 1, pos.y)) &&
+							resultImg.at<unsigned char>(pos.y, pos.x - 1) != 64 &&
+							meanDirectionMat.at<float>(pos.y, pos.x - 1) > 67.5 &&
+							meanDirectionMat.at<float>(pos.y, pos.x - 1) <= 112.5 &&
+							meanGradientMat.at<float>(pos.y, pos.x - 1) > meanGradientMat.at<float>(pos.y - 1, pos.x - 1) &&
+							meanGradientMat.at<float>(pos.y, pos.x - 1) > meanGradientMat.at<float>(pos.y + 1, pos.x - 1))
+						{
+							resultImg.ptr<unsigned char>(pos.y, pos.x - 1)[0] = 255;
+							imageChanged = true;
+						}
+					}
+					if (pos.x<w - 1) 
+					{ 
+						if (lowerThreshold <= meanGradientMat.at<float>(cv::Point(pos.x + 1, pos.y)) &&
+							resultImg.at<unsigned char>(pos.y, pos.x + 1) != 64 &&
+							meanDirectionMat.at<float>(pos.y, pos.x + 1) > 67.5 &&
+							meanDirectionMat.at<float>(pos.y, pos.x + 1) <= 112.5 &&
+							meanGradientMat.at<float>(pos.y, pos.x + 1) > meanGradientMat.at<float>(pos.y - 1, pos.x + 1) &&
+							meanGradientMat.at<float>(pos.y, pos.x + 1) > meanGradientMat.at<float>(pos.y + 1, pos.x + 1))
+						{ 
+							resultImg.ptr<unsigned char>(pos.y, pos.x + 1)[0] = 255;
+							imageChanged = true;
+						} 
+					} 
+				}
+				else if (currentDirection > 22.5 && currentDirection <= 67.5) 
+				{ 
+					if (pos.y>0 && pos.x<w - 1) 
+					{ 
+						if (lowerThreshold <= meanGradientMat.at<float>(cv::Point(pos.x + 1, pos.y - 1)) &&
+							resultImg.at<unsigned char>(pos.y - 1, pos.x + 1) != 64 &&
+							meanDirectionMat.at<float>(pos.y - 1, pos.x + 1) > 22.5 &&
+							meanDirectionMat.at<float>(pos.y - 1, pos.x + 1) <= 67.5 &&
+							meanGradientMat.at<float>(pos.y - 1, pos.x + 1) > meanGradientMat.at<float>(pos.y - 2, pos.x) &&
+							meanGradientMat.at<float>(pos.y - 1, pos.x + 1) > meanGradientMat.at<float>(pos.y, pos.x + 2))
+						{ 
+							resultImg.ptr<unsigned char>(pos.y - 1, pos.x + 1)[0] = 255;
+							imageChanged = true; 
+						} 
+					} 
+					if (pos.y<h - 1 && pos.x>0) 
+					{ 
+						if (lowerThreshold <= meanGradientMat.at<float>(cv::Point(pos.x - 1, pos.y + 1)) &&
+							resultImg.at<unsigned char>(pos.y + 1, pos.x - 1) != 64 &&
+							meanDirectionMat.at<float>(pos.y + 1, pos.x - 1) > 22.5 &&
+							meanDirectionMat.at<float>(pos.y + 1, pos.x - 1) <= 67.5 &&
+							meanGradientMat.at<float>(pos.y + 1, pos.x - 1) > meanGradientMat.at<float>(pos.y, pos.x - 2) &&
+							meanGradientMat.at<float>(pos.y + 1, pos.x - 1) > meanGradientMat.at<float>(pos.y + 2, pos.x))
+						{ 
+							resultImg.ptr<unsigned char>(pos.y + 1, pos.x - 1)[0] = 255;
+							imageChanged = true;
+						} 
+					} 
+				}
+				else {
+					if (pos.y>0)
+					{
+						if (lowerThreshold <= meanGradientMat.at<float>(cv::Point(pos.x, pos.y - 1)) &&
+							resultImg.at<unsigned char>(pos.y - 1, pos.x) != 64 &&
+							(meanDirectionMat.at<float>(pos.y - 1, pos.x) < 22.5 || meanDirectionMat.at<float>(pos.y - 1, pos.x) >= 157.5) &&
+							meanGradientMat.at<float>(pos.y - 1, pos.x) > meanGradientMat.at<float>(pos.y - 1, pos.x - 1) &&
+							meanGradientMat.at<float>(pos.y - 1, pos.x) > meanGradientMat.at<float>(pos.y - 1, pos.x + 2))
+						{ 
+							resultImg.ptr<unsigned char>(pos.y - 1, pos.x)[0] = 255;
+							imageChanged = true; 
+						} 
+					} 
+					if (pos.y<h - 1)
+					{ 
+						if (lowerThreshold <= meanGradientMat.at<float>(cv::Point(pos.x, pos.y + 1)) &&
+							resultImg.at<unsigned char>(pos.y + 1, pos.x) != 64 &&
+							(meanDirectionMat.at<float>(pos.y + 1, pos.x) < 22.5 || meanDirectionMat.at<float>(pos.y + 1, pos.x) >= 157.5) &&
+							meanGradientMat.at<float>(pos.y + 1, pos.x) > meanGradientMat.at<float>(pos.y + 1, pos.x - 1) &&
+							meanGradientMat.at<float>(pos.y + 1, pos.x) > meanGradientMat.at<float>(pos.y + 1, pos.x + 1))
+						{ 
+							resultImg.ptr<unsigned char>(pos.y + 1, pos.x)[0] = 255;
+							imageChanged = true;
+						} 
+					} 
+				}
+			}
+		}
+	}
+	cv::MatIterator_<unsigned char>current = resultImg.begin<unsigned char>();
+	cv::MatIterator_<unsigned char>final = resultImg.end<unsigned char>();
+	for (;current != final;++current)
+	{
+		if (*current == 64) *current = 255; 
+	}
+	*total_result = new Mat(resultImg.clone());
+ } 
+
+
 void CEdgeDetector::analyze(Image& colorImage,Image& depthImage,ImageCC& res)
 {
 	int w = ((CPPImage*)depthImage.get())->get_width();
@@ -218,23 +538,44 @@ void CEdgeDetector::analyze(Image& colorImage,Image& depthImage,ImageCC& res)
 
 	Image total_laplace(new CPPImage(w,h,1));
 	Image depth_laplace(new CPPImage(w,h,1));
-	Image hPic(new CPPImage(w,h,1));
+	Image hPic(new CPPImage(w, h, 1));
 
+	Image total_canny(new CPPImage(w, h, 1));
+	Image rgb_canny(new CPPImage(w, h, 1));
+	Image depth_canny(new CPPImage(w, h, 1));
+	depth_canny = CannyWithBiliteral(depthImage, 1);
+	rgb_canny = CannyWithBiliteral(colorImage, 3);
+	depth_canny = dilate(depth_canny);
+	rgb_canny = dilate(rgb_canny);
+
+	hsvdCanny(colorImage, depthImage, total_canny, 100, 40);
+	total_canny = dilate(total_canny);
 	calcLaplace(w,h,colorImage,depthImage,total_laplace,depth_laplace,hPic);
+	
+	// Debug image display yotam
+	CFrameManager::displayImage(depth_canny);
+	CFrameManager::displayImage(rgb_canny);
+	CFrameManager::displayImage(total_canny);
+	CFrameManager::displayImage(total_laplace);
+	CFrameManager::displayImage(depth_laplace);
+	CFrameManager::displayImage(hPic);
 
 	double now1 = GetTickCount();
 	invImage(total_laplace);
+	invImage(rgb_canny);
+
+	CFrameManager::displayImage(total_laplace);
+	CFrameManager::displayImage(rgb_canny);
 
 	// build general CC
 	cc_list* generalCC = new cc_list();
-
-
+	cc_list* generalCCcn = new cc_list();
 	cc::analyze(&total_laplace, generalCC,cc::config(true));
 	cleanNoise(generalCC,MIN_CC_SIZE);
 	setCCIds(generalCC);
-	
+	setCCIds(generalCCcn);
 	// debug
-  //CFrameManager::displayCC(generalCC);
+	CFrameManager::displayCC(generalCC);
 
 	// paint the line on the floor on the depth binary image
   

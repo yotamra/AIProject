@@ -86,8 +86,8 @@ Image CFrameManager::buildPersonRect(Image& colorImage,Image& depthImage,ClsEval
 	if (saveTracking)
 	{	
 		// create HSV image and fill it with 
-		cvCopy(((CPPImage*)colorImage.get())->get(),img);
-		cvCvtColor(img,img,CV_BGR2HSV);
+		cvCopy(((CPPImage*)colorImage.get())->get(),img); //TODO: there are things to change here
+		cv::cvtColor(*img,*img,CV_BGR2HSV);                      
 
 		CvScalar temp;
 		temp.val[0] = 0;
@@ -137,9 +137,9 @@ bool compare_cc(cc first, cc second)
 /*
 Colors an Image in a way that each connected component's pixels get different color.
 */
-map<unsigned int,CvScalar>* colorImageByCC(cc_list* CC_list,Image& res)
+map<unsigned int, cv::Vec3b>* colorImageByCC(cc_list* CC_list,Image& res)
 {
-	map<unsigned int,CvScalar>* depthIdToColor = new map<unsigned int,CvScalar>();
+	map<unsigned int,cv::Vec3b>* depthIdToColor = new map<unsigned int,cv::Vec3b>();
 	
 	//create the output color image. 
 
@@ -175,13 +175,13 @@ map<unsigned int,CvScalar>* colorImageByCC(cc_list* CC_list,Image& res)
 		{
 			int x = cc->coords[i].first;
 			int y = cc->coords[i].second;
-			CvScalar color;
+			cv::Vec3b color;
 			color.val[0] = r; 
 			color.val[1] = g;
 			color.val[2] = b;
 			color.val[3] = 0;
 			(*depthIdToColor)[cc->cc_id] = color;
-			cvSet2D(((CPPImage*)res.get())->get(),y,x, color);
+			res->get()->at<cv::Vec3b>(x, y) = color;
 		}
 		currGroupId = cc->group_id;
 	}

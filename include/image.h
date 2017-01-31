@@ -12,6 +12,7 @@
 #include <string>
 #include "prims.h"
 
+
 typedef unsigned char byte;
 
 namespace CPP {
@@ -143,41 +144,6 @@ typedef boost::shared_ptr<CPPImage> Image;
 inline Image load(const std::string& filename) { return Image(new CPPImage(filename)); }
 inline Image load(const char*        filename) { return Image(new CPPImage(filename)); }
 inline Image attach(Mat* image) { return Image(new CPPImage(image)); }
-
-class CPPKernel
-{
-  Mat* m_Kernel;
-public:
-  // Create a structuring element of size w,h
-  // anchor defaults to center
-  // Use mask to specify content.  If mask is not used, a Rectangular element is used
-  CPPKernel(int w, int h, int anchor_x=-1, int anchor_y=-1, Mat* mask=0)
-    : m_Kernel(0)
-  {
-    if (anchor_x<0) anchor_x=w/2;
-    if (anchor_y<0) anchor_y=h/2;
-    std::vector<int> values(w*h,0);
-    if (mask)
-    {
-      std::vector<int>::iterator it=values.begin();
-      for(int y=0;y<h;++y)
-      {
-        unsigned char* ptr=get_row(mask,y);
-        for(int x=0;x<w;++x,++it,++ptr) *it=*ptr;
-      }
-	  *m_Kernel = cv::getStructuringElement(CV_SHAPE_CUSTOM, cv::Size(w, h), cv::Point(anchor_x, anchor_y));
-    }
-    else
-    {
-	  *m_Kernel = cv::getStructuringElement(CV_SHAPE_RECT,cv::Size(w, h), cv::Point(anchor_x, anchor_y));
-    }
-  }
-
-  ~CPPKernel(){}
-  Mat* get() { return m_Kernel; }
-};
-
-typedef boost::shared_ptr<CPPKernel> Kernel;
 
 template<class T>
 class CPPMatrix
@@ -353,69 +319,46 @@ inline Image scale_to(Image image, int w, int h, int interpolation=1)
   return target;
 }
 
-inline Image erode(Image image, int iter=1)
-{
-  Image target(image->clone());
-  cv::erode(*image->get(),*target->get(),0,cv::Point(-1,-1),iter);
-  return target;
-}
-
-inline Image erode(Image image, Kernel kernel, int iter=1)
-{
-  Image target(image->clone());
-  cv::erode(*image->get(), *target->get(), *kernel->get(), cv::Point(-1, -1), iter);
-  return target;
-}
-
 inline Image dilate(Image image, int iter=1)
 {
   Image target(image->clone());
-  cvDilate(image->get(),target->get(),0,iter);
+  Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(4, 4));
+  cv::dilate(*image->get(),*target->get(),element,cv::Point(-1,-1),iter);
   return target;
 }
 
-inline Image dilate(Image image, Kernel kernel, int iter=1)
+inline Image CannyWithBiliteral(const Image& image, int channels)
 {
-  Image target(image->clone());
-  cv::dilate(*image->get(),*target->get(),*kernel->get(),cv::Point(-1,-1),iter);
-  return target;
-}
+	Image target(image->clone());
+	cv::bilateralFilter(*image->get(), *target->get(), 5, 80, 80);
+	//cv::namedWindow("Image:", CV_WINDOW_AUTOSIZE);
+	if (channels == 1) 
+	{
+		//CFrameManager::displayImage(target);
+		//cv::imshow("Image:", *target->get());
+		//cv::waitKey(0);
+		cv::Canny(*target->get(), *target->get(), 30, 90);
+	}
+	if (channels == 3) {
+		Mat bgr[3];					//destination array
+		cv::split(*target->get(), bgr);			//split source  
 
-inline Image morphology_open(Image image, Kernel kernel, int iter=1)
-{
-  Image target(image->clone());
-  cv::morphologyEx(*image->get(),*target->get(), cv::MORPH_ERODE,*kernel->get(), cv::Point(-1, -1),iter, CV_MOP_OPEN);
-  return target;
-}
+		cv::Canny(bgr[0], bgr[0], int(255/3), 255);
+		cv::Canny(bgr[1], bgr[1], int(255/3), 255);
+		cv::Canny(bgr[2], bgr[2], int(255/3), 255);
 
-inline Image morphology_close(Image image, Kernel kernel, int iter=1)
-{
-  Image target(image->clone());
-  cv::morphologyEx(*image->get(), *target->get(), cv::MORPH_ERODE, *kernel->get(), cv::Point(-1, -1), iter, CV_MOP_CLOSE);
-  return target;
+		Mat mergedImage;
+		bitwise_or(bgr[0], bgr[1], mergedImage);
+		bitwise_or(mergedImage, bgr[2], mergedImage);
+		*target->get() = mergedImage;
+	//CFrameManager::displayImage(target);
+	//cv::imshow("Image:", *target->get());
+	//cv::waitKey(0);
+	// Wait for the user to press a key in the GUI window.
+	}
+	
+	return target;
 }
-
-inline Image morphology_tophat(Image image, Kernel kernel, int iter=1)
-{
-  Image target(image->clone());
-  cv::morphologyEx(*image->get(), *target->get(), cv::MORPH_ERODE, *kernel->get(), cv::Point(-1, -1), iter, CV_MOP_TOPHAT);
-  return target;
-}
-
-inline Image morphology_blackhat(Image image, Kernel kernel, int iter=1)
-{
-  Image target(image->clone());
-  cv::morphologyEx(*image->get(), *target->get(), cv::MORPH_ERODE, *kernel->get(), cv::Point(-1, -1), iter, CV_MOP_BLACKHAT);
-  return target;
-}
-
-inline Image smooth(const Image& image)
-{
-  Image target(image->clone());
-  cv::GaussianBlur(*image->get(), *target->get(),cv::Size(7,7), 5);
-  return target;
-}
-
 template<class T>
 inline Image filter(const Image& image, const CPPMatrix<T>& matrix)
 {
@@ -504,7 +447,6 @@ inline Rect bounding_rect(const Image& img, byte bg=0)
 }
 
 inline Image crop(const Image& img, const cv::Rect& r)
-//IplImage *BasicOpenCV::Crop(IplImage *image,CvRect selection)
 {
   Mat src=*img->get();
   Mat* dst = new Mat(src(r).clone());

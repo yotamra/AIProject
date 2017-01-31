@@ -29,6 +29,8 @@ public :
 	static void calcLaplace(unsigned w,unsigned h,
 							Image& colorImage,Image& depthImage,
 							Image& dstImage,Image& depthLaplace,Image& hPic);
+	static void hsvdCanny(Image& colorImage, Image& depthImage, Image& total_result,
+						   int upperThreshold, int lowerThreshold, double size);
 	static void setCCIds(cc_list* CC);
 	static void drawBottomLine(Image& src);
 };
