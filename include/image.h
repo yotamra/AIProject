@@ -204,7 +204,7 @@ inline void paste(Image target, Image source, int ox, int oy)
   }
 }
 
-inline void and(Image a, Image b) // a&=b
+inline void and(Image a, Image b) 
 {
 	unsigned w = a->get_width(), h = a->get_height(), ch = a->get_channels();
 	if (w != b->get_width() || h != b->get_height() || ch != b->get_channels())
